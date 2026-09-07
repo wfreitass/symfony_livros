@@ -1,42 +1,85 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Relatório de Livros por Autor{% endblock %}
+{% block title %}Relatório Gerencial de Livros{% endblock %}
 
 {% block body %}
-<twig:PageHeader title="Relatório de Livros por Autor"
-    subtitle="Dados consolidados diretamente da VIEW SQL do banco de dados" :actions="[
-            { label: 'Exportar PDF', url: path('app_relatorio_pdf'), icon: 'bi-file-earmark-pdf', class: 'btn-danger' }
+<twig:PageHeader title="Relatório Gerencial & Estatísticas"
+    subtitle="Consolidação analítica alimentada pela VIEW SQL (vw_relatorio_livros)" :actions="[
+            { label: 'Exportar Relatório em PDF', url: path('app_relatorio_pdf'), icon: 'bi-file-earmark-pdf', class: 'btn-danger' }
         ]" />
 
-<!-- Cards de Métricas -->
+<!-- Cards de Métricas Gerais -->
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="card border-0 shadow-sm bg-primary text-white">
-            <div class="card-body">
-                <h6 class="text-white-50 text-uppercase fw-bold small">Total de Autores</h6>
-                <h3 class="fw-bold mb-0">{{ totalAutores }}</h3>
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-white-50 text-uppercase fw-bold small mb-1">Total de Autores</h6>
+                    <h2 class="fw-bold mb-0">{{ totalAutores }}</h2>
+                </div>
+                <i class="bi bi-people fs-1 text-white-50"></i>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card border-0 shadow-sm bg-secondary text-white">
-            <div class="card-body">
-                <h6 class="text-white-50 text-uppercase fw-bold small">Livros Vinculados</h6>
-                <h3 class="fw-bold mb-0">{{ totalObras }}</h3>
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-white-50 text-uppercase fw-bold small mb-1">Livros no Acervo</h6>
+                    <h2 class="fw-bold mb-0">{{ totalObras }}</h2>
+                </div>
+                <i class="bi bi-book fs-1 text-white-50"></i>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card border-0 shadow-sm bg-success text-white">
-            <div class="card-body">
-                <h6 class="text-white-50 text-uppercase fw-bold small">Valor Total do Acervo</h6>
-                <h3 class="fw-bold mb-0">{{ valorTotal|money_br }}</h3>
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-white-50 text-uppercase fw-bold small mb-1">Valor Total em Livros</h6>
+                    <h2 class="fw-bold mb-0">{{ valorTotal|money_br }}</h2>
+                </div>
+                <i class="bi bi-cash-coin fs-1 text-white-50"></i>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Tabela Agrupada por Autor -->
+<!-- Seção de Gráficos Nativos Symfony UX -->
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4 mb-lg-0">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
+                <i class="bi bi-bar-chart-fill text-primary me-2 fs-5"></i>
+                <h6 class="m-0 fw-bold text-dark">Obras por Autor</h6>
+            </div>
+            <div class="card-body">
+                {{ render_chart(chartLivros) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
+                <i class="bi bi-pie-chart-fill text-success me-2 fs-5"></i>
+                <h6 class="m-0 fw-bold text-dark">Valor do Acervo por Autor (R$)</h6>
+            </div>
+            <div class="card-body">
+                {{ render_chart(chartValores) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela Detalhada Agrupada por Autor -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold text-dark mb-0">
+        <i class="bi bi-table me-2 text-primary"></i>Detalhamento das Obras Agrupadas por Autor
+    </h5>
+    <span class="badge bg-light text-muted border">Fonte: VIEW SQL vw_relatorio_livros</span>
+</div>
+
 {% for autor in dados %}
 <twig:Card title="{{ autor.nome }}" icon="bi-person-badge">
     <div class="table-responsive">
@@ -48,7 +91,7 @@
                     <th>Editora</th>
                     <th class="text-center" style="width: 80px;">Edição</th>
                     <th class="text-center" style="width: 90px;">Ano</th>
-                    <th class="text-end" style="width: 120px;">Valor</th>
+                    <th class="text-end" style="width: 130px;">Valor</th>
                     <th>Assuntos / Gêneros</th>
                 </tr>
             </thead>
@@ -63,9 +106,9 @@
                     <td class="text-end fw-bold text-success">{{ livro.valor|money_br }}</td>
                     <td>
                         {% for assunto in livro.assuntos %}
-                        <span class="badge bg-light text-dark border">{{ assunto }}</span>
+                        <span class="badge bg-light text-dark border me-1">{{ assunto }}</span>
                         {% else %}
-                        <span class="text-muted small">Sem assunto</span>
+                        <span class="text-muted small">Nenhum</span>
                         {% endfor %}
                     </td>
                 </tr>

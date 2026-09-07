@@ -11,13 +11,10 @@ class RelatorioService
     ) {}
 
     /**
-     * Consulta a VIEW SQL "vw_relatorio_livros" e agrupa os livros e assuntos por autor.
-     *
-     * @return array Estrutura hierárquica: Autor -> Livros -> Assuntos
+     * Retorna a estrutura agrupada por Autor para a tabela e o PDF.
      */
     public function getDadosRelatorioAgrupadosPorAutor(): array
     {
-        // Consulta obrigatória proveniente da VIEW criada no banco de dados
         $sql = 'SELECT * FROM vw_relatorio_livros ORDER BY autor_nome ASC, livro_titulo ASC, assunto_descricao ASC';
         $rows = $this->connection->executeQuery($sql)->fetchAllAssociative();
 
@@ -53,5 +50,47 @@ class RelatorioService
         }
 
         return $autoresAgrupados;
+    }
+
+    /**
+     * Retorna métricas consolidadas diretamente da VIEW para alimentar o Chart.js.
+     */
+    public function getMetricasGraficos(): array
+    {
+        // 1. Quantidade de Livros e Soma de Valores por Autor a partir da VIEW
+        $sqlAutores = '
+            SELECT 
+                autor_nome,
+                COUNT(DISTINCT livro_id) AS total_livros,
+                SUM(livro_valor) AS valor_total
+            FROM vw_relatorio_livros
+            GROUP BY autor_id, autor_nome
+            ORDER BY total_livros DESC, valor_total DESC
+        ';
+        $dadosAutores = $this->connection->executeQuery($sqlAutores)->fetchAllAssociative();
+
+        // 2. Quantidade de Obras por Assunto a partir da VIEW
+        $sqlAssuntos = '
+            SELECT 
+                assunto_descricao,
+                COUNT(DISTINCT livro_id) AS total_livros
+            FROM vw_relatorio_livros
+            WHERE assunto_descricao IS NOT NULL
+            GROUP BY assunto_id, assunto_descricao
+            ORDER BY total_livros DESC
+        ';
+        $dadosAssuntos = $this->connection->executeQuery($sqlAssuntos)->fetchAllAssociative();
+
+        return [
+            'autores' => [
+                'labels' => array_column($dadosAutores, 'autor_nome'),
+                'quantidades' => array_map('intval', array_column($dadosAutores, 'total_livros')),
+                'valores' => array_map('floatval', array_column($dadosAutores, 'valor_total')),
+            ],
+            'assuntos' => [
+                'labels' => array_column($dadosAssuntos, 'assunto_descricao'),
+                'quantidades' => array_map('intval', array_column($dadosAssuntos, 'total_livros')),
+            ],
+        ];
     }
 }

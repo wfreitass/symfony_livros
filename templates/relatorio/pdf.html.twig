@@ -3,68 +3,114 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Relatório de Livros por Autor</title>
+    <title>Relatório Gerencial de Livros</title>
     <style>
+        @page {
+            margin: 25px 30px 40px 30px;
+        }
+
         body {
             font-family: Helvetica, Arial, sans-serif;
-            font-size: 11px;
-            color: #333;
-            margin: 20px;
+            font-size: 10px;
+            color: #212529;
+            margin: 0;
+            padding: 0;
         }
 
         .header {
             border-bottom: 2px solid #0d6efd;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
         }
 
         .header h1 {
             font-size: 18px;
             margin: 0;
             color: #0d6efd;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .header .meta {
-            font-size: 9px;
-            color: #777;
-            margin-top: 5px;
+            font-size: 8.5px;
+            color: #6c757d;
+            margin-top: 4px;
         }
 
-        .autor-section {
-            margin-bottom: 20px;
-            page-break-inside: avoid;
+        /* Cards de Métricas Gerais (KPIs) */
+        .kpi-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 8px 0;
+            margin-bottom: 18px;
         }
 
-        .autor-header {
-            background-color: #f1f5f9;
-            padding: 6px 10px;
-            font-size: 13px;
+        .kpi-card {
+            padding: 10px;
+            border-radius: 4px;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .kpi-blue {
+            background-color: #0d6efd;
+        }
+
+        .kpi-gray {
+            background-color: #6c757d;
+        }
+
+        .kpi-green {
+            background-color: #198754;
+        }
+
+        .kpi-title {
+            font-size: 8px;
+            text-transform: uppercase;
+            opacity: 0.85;
+            margin-bottom: 4px;
+        }
+
+        .kpi-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* Seções e Títulos */
+        .section-title {
+            font-size: 12px;
             font-weight: bold;
             color: #1e293b;
-            border-left: 4px solid #0d6efd;
-            margin-bottom: 5px;
+            border-bottom: 1px solid #cbd5e1;
+            padding-bottom: 4px;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
         }
 
+        /* Tabelas */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         th {
             background-color: #f8fafc;
             border-bottom: 1px solid #cbd5e1;
-            padding: 6px;
+            border-top: 1px solid #e2e8f0;
+            padding: 5px 6px;
             text-align: left;
-            font-size: 10px;
+            font-size: 8.5px;
             text-transform: uppercase;
             color: #475569;
         }
 
         td {
             border-bottom: 1px solid #e2e8f0;
-            padding: 6px;
-            font-size: 10px;
+            padding: 5px 6px;
+            font-size: 9px;
+            vertical-align: middle;
         }
 
         .text-center {
@@ -75,68 +121,155 @@
             text-align: right;
         }
 
-        .assunto-tag {
-            background-color: #e2e8f0;
-            padding: 2px 5px;
+        /* Barra de Progresso Visual em CSS */
+        .bar-container {
+            background-color: #e9ecef;
             border-radius: 3px;
-            font-size: 9px;
-            margin-right: 3px;
+            height: 10px;
+            width: 100%;
+            overflow: hidden;
         }
 
+        .bar-fill {
+            background-color: #0d6efd;
+            height: 100%;
+        }
+
+        /* Seção por Autor */
+        .autor-section {
+            margin-bottom: 14px;
+            page-break-inside: avoid;
+        }
+
+        .autor-header {
+            background-color: #f1f5f9;
+            padding: 5px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #0f172a;
+            border-left: 4px solid #0d6efd;
+            margin-bottom: 4px;
+        }
+
+        .badge {
+            background-color: #e2e8f0;
+            color: #334155;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 8px;
+            margin-right: 2px;
+            display: inline-block;
+        }
+
+        /* Rodapé fixo */
         .footer {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             text-align: center;
-            font-size: 8px;
+            font-size: 7.5px;
             color: #94a3b8;
             border-top: 1px solid #e2e8f0;
-            padding-top: 5px;
+            padding-top: 4px;
         }
     </style>
 </head>
 
 <body>
+    <!-- Cabeçalho -->
     <div class="header">
-        <h1>Sistema de Cadastro de Livros - Relatório por Autor</h1>
+        <h1>Sistema de Cadastro de Livros - Relatório Gerencial</h1>
         <div class="meta">
-            Consulta gerada a partir da VIEW SQL: <code>vw_relatorio_livros</code> | Data de emissão: {{
-            geradoEm|date('d/m/Y H:i:s') }}
+            Fonte: VIEW SQL <code>vw_relatorio_livros</code> &bull; Data de Emissão: {{ geradoEm|date('d/m/Y H:i:s') }}
         </div>
     </div>
+
+    <!-- 1. Cards de Métricas Gerais -->
+    <table class="kpi-table">
+        <tr>
+            <td class="kpi-card kpi-blue" style="width: 33%;">
+                <div class="kpi-title">Total de Autores</div>
+                <div class="kpi-value">{{ totalAutores }}</div>
+            </td>
+            <td class="kpi-card kpi-gray" style="width: 33%;">
+                <div class="kpi-title">Livros no Acervo</div>
+                <div class="kpi-value">{{ totalObras }}</div>
+            </td>
+            <td class="kpi-card kpi-green" style="width: 34%;">
+                <div class="kpi-title">Valor Total do Acervo</div>
+                <div class="kpi-value">{{ valorTotal|money_br }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- 2. Sumário Estatístico e Distribuição de Obras por Autor -->
+    {% if metricas.autores.labels|length > 0 %}
+    <div class="section-title">1. Resumo Estatístico de Obras por Autor</div>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 35%;">Autor</th>
+                <th class="text-center" style="width: 15%;">Qtd. Obras</th>
+                <th class="text-right" style="width: 20%;">Valor Total (R$)</th>
+                <th style="width: 30%;">Distribuição</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i, autorNome in metricas.autores.labels %}
+            {% set qtd = metricas.autores.quantidades[i] %}
+            {% set val = metricas.autores.valores[i] %}
+            {% set percentual = totalObras > 0 ? ((qtd / totalObras) * 100)|round : 0 %}
+            <tr>
+                <td><strong>{{ autorNome }}</strong></td>
+                <td class="text-center">{{ qtd }}</td>
+                <td class="text-right" style="color: #198754; font-weight: bold;">{{ val|money_br }}</td>
+                <td>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: {{ percentual }}%;"></div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <!-- 3. Detalhamento das Obras Agrupadas por Autor -->
+    <div class="section-title">2. Detalhamento das Obras por Autor</div>
 
     {% for autor in dados %}
     <div class="autor-section">
         <div class="autor-header">
-            Autor: {{ autor.nome }} ({{ autor.livros|length }} {{ autor.livros|length > 1 ? 'obras' : 'obra' }})
+            {{ autor.nome }} &mdash; {{ autor.livros|length }} {{ autor.livros|length > 1 ? 'obras cadastradas' : 'obra
+            cadastrada' }}
         </div>
         <table>
             <thead>
                 <tr>
-                    <th style="width: 40px;">Cód.</th>
-                    <th>Título</th>
+                    <th style="width: 35px;">Cód.</th>
+                    <th>Título da Obra</th>
                     <th>Editora</th>
-                    <th class="text-center" style="width: 40px;">Ed.</th>
-                    <th class="text-center" style="width: 50px;">Ano</th>
-                    <th class="text-right" style="width: 70px;">Valor</th>
-                    <th>Assuntos</th>
+                    <th class="text-center" style="width: 35px;">Ed.</th>
+                    <th class="text-center" style="width: 45px;">Ano</th>
+                    <th class="text-right" style="width: 75px;">Valor</th>
+                    <th style="width: 25%;">Assuntos / Gêneros</th>
                 </tr>
             </thead>
             <tbody>
                 {% for livro in autor.livros %}
                 <tr>
-                    <td>#{{ livro.id }}</td>
+                    <td class="text-center" style="color: #6c757d;">#{{ livro.id }}</td>
                     <td><strong>{{ livro.titulo }}</strong></td>
                     <td>{{ livro.editora }}</td>
                     <td class="text-center">{{ livro.edicao }}ª</td>
                     <td class="text-center">{{ livro.anoPublicacao }}</td>
-                    <td class="text-right">{{ livro.valor|money_br }}</td>
+                    <td class="text-right" style="color: #198754; font-weight: bold;">{{ livro.valor|money_br }}</td>
                     <td>
                         {% for assunto in livro.assuntos %}
-                        <span class="assunto-tag">{{ assunto }}</span>
+                        <span class="badge">{{ assunto }}</span>
                         {% else %}
-                        -
+                        <span style="color: #999;">Nenhum</span>
                         {% endfor %}
                     </td>
                 </tr>
@@ -145,11 +278,13 @@
         </table>
     </div>
     {% else %}
-    <p style="text-align: center; color: #777; margin-top: 40px;">Nenhum registro encontrado na View de relatórios.</p>
+    <p style="text-align: center; color: #777; margin-top: 30px;">Nenhum registro encontrado na VIEW SQL.</p>
     {% endfor %}
 
+    <!-- Rodapé -->
     <div class="footer">
-        Documento gerado automaticamente pelo Sistema de Gestão de Livros
+        Documento gerado automaticamente pelo Sistema de Gestão de Livros &bull; Dados extraídos da VIEW
+        vw_relatorio_livros
     </div>
 </body>
 
