@@ -2,11 +2,10 @@
 
 namespace App\Controller;
 
+use App\Contract\AutorServiceInterface;
 use App\Entity\Autor;
+use App\Exception\EntityInUseException;
 use App\Form\AutorType;
-use App\Repository\AutorRepository;
-use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,24 +14,27 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/autor')]
 class AutorController extends AbstractController
 {
+    public function __construct(
+        private readonly AutorServiceInterface $autorService
+    ) {}
+
     #[Route('/', name: 'app_autor_index', methods: ['GET'])]
-    public function index(AutorRepository $autorRepository): Response
+    public function index(): Response
     {
         return $this->render('autor/index.html.twig', [
-            'autores' => $autorRepository->findBy([], ['nome' => 'ASC']),
+            'autores' => $this->autorService->listAll(),
         ]);
     }
 
     #[Route('/novo', name: 'app_autor_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request): Response
     {
         $autor = new Autor();
         $form = $this->createForm(AutorType::class, $autor);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($autor);
-            $entityManager->flush();
+            $this->autorService->save($autor);
 
             $this->addFlash('success', 'Autor cadastrado com sucesso!');
             return $this->redirectToRoute('app_autor_index');
@@ -45,13 +47,13 @@ class AutorController extends AbstractController
     }
 
     #[Route('/{id}/editar', name: 'app_autor_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Autor $autor, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Autor $autor): Response
     {
         $form = $this->createForm(AutorType::class, $autor);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+            $this->autorService->save($autor);
 
             $this->addFlash('success', 'Autor atualizado com sucesso!');
             return $this->redirectToRoute('app_autor_index');
@@ -64,18 +66,14 @@ class AutorController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_autor_delete', methods: ['POST'])]
-    public function delete(Request $request, Autor $autor, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Autor $autor): Response
     {
         if ($this->isCsrfTokenValid('delete' . $autor->getId(), (string) $request->request->get('_token'))) {
             try {
-                $entityManager->remove($autor);
-                $entityManager->flush();
+                $this->autorService->delete($autor);
                 $this->addFlash('success', 'Autor excluído com sucesso!');
-            } catch (ForeignKeyConstraintViolationException) {
-                $this->addFlash('danger', sprintf(
-                    'Não é possível excluir o autor "%s" porque ele está vinculado a um ou mais livros.',
-                    $autor->getNome()
-                ));
+            } catch (EntityInUseException $e) {
+                $this->addFlash('danger', $e->getMessage());
             }
         }
 

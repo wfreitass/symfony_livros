@@ -40,4 +40,12 @@ class AssuntoRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * @return Assunto[]
+     */
+    public function findAllOrderedByDescricao(): array
+    {
+        return $this->findBy([], ['descricao' => 'ASC']);
+    }
 }

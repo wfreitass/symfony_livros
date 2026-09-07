@@ -40,4 +40,12 @@ class AutorRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * @return Autor[]
+     */
+    public function findAllOrderedByName(): array
+    {
+        return $this->findBy([], ['nome' => 'ASC']);
+    }
 }

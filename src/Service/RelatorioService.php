@@ -2,9 +2,10 @@
 
 namespace App\Service;
 
+use App\Contract\RelatorioServiceInterface;
 use Doctrine\DBAL\Connection;
 
-class RelatorioService
+class RelatorioService implements RelatorioServiceInterface
 {
     public function __construct(
         private readonly Connection $connection
@@ -91,6 +92,32 @@ class RelatorioService
                 'labels' => array_column($dadosAssuntos, 'assunto_descricao'),
                 'quantidades' => array_map('intval', array_column($dadosAssuntos, 'total_livros')),
             ],
+        ];
+    }
+
+    /**
+     * Calcula métricas totais a partir dos dados agrupados.
+     *
+     * @param array<int, array{id: int, nome: string, livros: array<int, array{valor: string|float}>}> $dados
+     * @return array{totalAutores: int, totalObras: int, valorTotal: float}
+     */
+    public function calcularTotais(array $dados): array
+    {
+        $totalAutores = count($dados);
+        $totalObras = 0;
+        $valorTotal = 0.0;
+
+        foreach ($dados as $autor) {
+            $totalObras += count($autor['livros']);
+            foreach ($autor['livros'] as $livro) {
+                $valorTotal += (float) $livro['valor'];
+            }
+        }
+
+        return [
+            'totalAutores' => $totalAutores,
+            'totalObras' => $totalObras,
+            'valorTotal' => $valorTotal,
         ];
     }
 }

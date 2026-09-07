@@ -2,10 +2,11 @@
 
 namespace App\Service;
 
+use App\Contract\PdfServiceInterface;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
-class PdfService
+class PdfService implements PdfServiceInterface
 {
     public function generatePdf(string $html): string
     {

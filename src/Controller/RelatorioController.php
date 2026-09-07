@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Service\PdfService;
-use App\Service\RelatorioService;
+use App\Contract\PdfServiceInterface;
+use App\Contract\RelatorioServiceInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -14,8 +14,8 @@ use Symfony\UX\Chartjs\Model\Chart;
 class RelatorioController extends AbstractController
 {
     public function __construct(
-        private readonly RelatorioService $relatorioService,
-        private readonly PdfService $pdfService,
+        private readonly RelatorioServiceInterface $relatorioService,
+        private readonly PdfServiceInterface $pdfService,
         private readonly ChartBuilderInterface $chartBuilder
     ) {}
 
@@ -78,23 +78,14 @@ class RelatorioController extends AbstractController
             'responsive' => true,
         ]);
 
-        // Métricas de topo
-        $totalAutores = count($dados);
-        $totalObras = 0;
-        $valorTotal = 0.0;
-
-        foreach ($dados as $autor) {
-            $totalObras += count($autor['livros']);
-            foreach ($autor['livros'] as $livro) {
-                $valorTotal += (float) $livro['valor'];
-            }
-        }
+        // Métricas de topo calculadas pela service
+        $totais = $this->relatorioService->calcularTotais($dados);
 
         return $this->render('relatorio/index.html.twig', [
             'dados' => $dados,
-            'totalAutores' => $totalAutores,
-            'totalObras' => $totalObras,
-            'valorTotal' => $valorTotal,
+            'totalAutores' => $totais['totalAutores'],
+            'totalObras' => $totais['totalObras'],
+            'valorTotal' => $totais['valorTotal'],
             'chartLivros' => $chartLivros,
             'chartValores' => $chartValores,
         ]);
@@ -105,23 +96,13 @@ class RelatorioController extends AbstractController
     {
         $dados = $this->relatorioService->getDadosRelatorioAgrupadosPorAutor();
         $metricas = $this->relatorioService->getMetricasGraficos();
-
-        $totalAutores = count($dados);
-        $totalObras = 0;
-        $valorTotal = 0.0;
-
-        foreach ($dados as $autor) {
-            $totalObras += count($autor['livros']);
-            foreach ($autor['livros'] as $livro) {
-                $valorTotal += (float) $livro['valor'];
-            }
-        }
+        $totais = $this->relatorioService->calcularTotais($dados);
 
         $html = $this->renderView('relatorio/pdf.html.twig', [
             'dados' => $dados,
-            'totalAutores' => $totalAutores,
-            'totalObras' => $totalObras,
-            'valorTotal' => $valorTotal,
+            'totalAutores' => $totais['totalAutores'],
+            'totalObras' => $totais['totalObras'],
+            'valorTotal' => $totais['valorTotal'],
             'metricas' => $metricas,
             'geradoEm' => new \DateTimeImmutable(),
         ]);
