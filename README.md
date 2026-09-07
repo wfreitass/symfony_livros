@@ -5,7 +5,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
-[![PHPUnit](https://img.shields.io/badge/Tests-48%20Passed-3776AB?logo=pytest&logoColor=white)](https://phpunit.de/)
+[![PHPUnit](https://img.shields.io/badge/Tests-54%20Passed-3776AB?logo=pytest&logoColor=white)](https://phpunit.de/)
 
 Sistema corporativo para cadastro e controle de acervo de livros, autores e assuntos com dashboard executivo, gráficos analíticos interativos e exportação de relatórios em PDF, desenvolvido como solução para o Desafio Técnico de Engenharia de Software.
 
@@ -25,18 +25,23 @@ O projeto foi concebido seguindo os princípios de **Clean Code**, **SOLID**, **
 - **PHP 8.4 & Doctrine ORM 3.x:** Mapeamento moderno via atributos nativos (`#[ORM\Table]`, `#[ORM\Column(name: '`Codl`')]`), mantendo o código PHP com propriedades em camelCase (`$id`, `$titulo`, `$anoPublicacao`, `$valor`).
 - **Requisito do Valor Monetário (R$):** Armazenado no banco como `DECIMAL(10,2)` no PostgreSQL, com conversão bidirecional via `BrazilianMoneyTransformer` no formulário e filtro Twig `|money_br` na apresentação.
 
-### 3. Relatório Gerencial Obrigatório com VIEW SQL Nativa
+### 3. Paginação Inteligente com KnpPaginatorBundle
+- **Padrão de 5 Itens por Página:** Configurado centralmente em `config/packages/knp_paginator.yaml` com template deslizante do Bootstrap 5 (`@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig`).
+- **Otimização em QueryBuilders:** Repositórios expõem métodos geradores de queries paginadas (`createAllWithAutoresAndAssuntosQueryBuilder()`, etc.) prevenindo queries N+1 e garantindo alta performance mesmo em grandes massas de dados.
+- **Integração na Service Layer:** Métodos `listPaginated(int $page = 1, int $limit = 5): PaginationInterface` padronizados em todos os contratos de serviço.
+
+### 4. Relatório Gerencial Obrigatório com VIEW SQL Nativa
 - **Versionamento via Migrations:** Criação da view `vw_relatorio_livros` diretamente no PostgreSQL via Doctrine Migrations.
 - **Agrupamento por Autor com Co-autorias:** A consulta é executada via Doctrine DBAL pelo `RelatorioService`, agrupando as obras por autor e tratando cenários onde um livro possui múltiplos autores e múltiplos assuntos sem redundância incorreta.
 - **Gráficos Nativos Symfony UX Chart.js:** Configurados no PHP via `ChartBuilderInterface` e renderizados de forma reativa pelo Symfony UX / Stimulus.
 - **Exportação em PDF:** Geração de documento corporativo em formato A4 utilizando **Dompdf**, com sumário executivo, KPIs e distribuição percentual de acervo.
 
-### 4. Componentes Reutilizáveis com Symfony UX Twig Component
+### 5. Componentes Reutilizáveis com Symfony UX Twig Component
 - Componentização declarativa oficial do Symfony UX (`<twig:PageHeader>`, `<twig:Card>`, `<twig:Table>`, `<twig:Button>`, `<twig:Navbar>`, `<twig:Alert>`).
 - Redução drástica de repetição de HTML nos templates com parametrização tipada no PHP (`#[AsTwigComponent]`).
 
-### 5. Resiliência e Integridade de Dados
-- **Prevenção de Consultas N+1:** Método customizado no `LivroRepository` (`findAllWithAutoresAndAssuntos()`) utilizando `LEFT JOIN` e `addSelect` para carregar livros, autores e assuntos em uma única consulta otimizada.
+### 6. Resiliência e Integridade de Dados
+- **Prevenção de Consultas N+1:** Método customizado no `LivroRepository` (`createAllWithAutoresAndAssuntosQueryBuilder()`) utilizando `LEFT JOIN` e `addSelect` para carregar livros, autores e assuntos em uma única consulta otimizada.
 - **Tratamento Cirúrgico de Exclusões:** Bloqueio de exclusão para autores ou assuntos que possuam livros vinculados com lançamento de `EntityInUseException`, emitindo feedback visual amigável (`alert-danger`) em vez de páginas de erro genéricas.
 
 ---
@@ -48,6 +53,7 @@ O projeto foi concebido seguindo os princípios de **Clean Code**, **SOLID**, **
 - **PostgreSQL 16** (com VIEW SQL versionada)
 - **Nginx (Alpine)**
 - **Doctrine ORM 3.x & Doctrine Migrations**
+- **KnpPaginatorBundle 6.x** (Paginação configurada para 5 itens por página com Bootstrap 5)
 - **Symfony UX Twig Components & Symfony UX Chart.js**
 - **Dompdf 3.x**
 - **PHPUnit 13**
@@ -90,7 +96,7 @@ Abra no seu navegador:
 
 ## 🧪 Suíte de Testes Automatizados (TDD)
 
-O projeto conta com **48 testes e 220 asserções** cobrindo testes unitários e testes funcionais HTTP de ponta a ponta:
+O projeto conta com **54 testes e 260 asserções** cobrindo testes unitários e testes funcionais HTTP de ponta a ponta:
 
 ```bash
 docker compose exec app bin/phpunit
@@ -99,13 +105,13 @@ docker compose exec app bin/phpunit
 ### Cobertura da Suíte:
 1. **Testes Funcionais / HTTP (`WebTestCase`):**
    - [`HomeControllerTest`](file:///home/workspace/livros/tests/Functional/HomeControllerTest.php): Requisições na raiz `/`, verificação dos cards de KPI e links rápidos.
-   - [`LivroControllerTest`](file:///home/workspace/livros/tests/Functional/LivroControllerTest.php): Listagem, formulário de cadastro com conversão de moeda (`BrazilianMoneyTransformer`), edição e exclusão.
-   - [`AutorControllerTest`](file:///home/workspace/livros/tests/Functional/AutorControllerTest.php): CRUD completo e validação de bloqueio de exclusão para autores com obras vinculadas.
-   - [`AssuntoControllerTest`](file:///home/workspace/livros/tests/Functional/AssuntoControllerTest.php): CRUD completo e validação de integridade referencial.
+   - [`LivroControllerTest`](file:///home/workspace/livros/tests/Functional/LivroControllerTest.php): Listagem paginada (5 itens/página), formulário de cadastro com conversão de moeda (`BrazilianMoneyTransformer`), edição e exclusão.
+   - [`AutorControllerTest`](file:///home/workspace/livros/tests/Functional/AutorControllerTest.php): CRUD completo, paginação KnpPaginator e validação de bloqueio de exclusão para autores com obras vinculadas.
+   - [`AssuntoControllerTest`](file:///home/workspace/livros/tests/Functional/AssuntoControllerTest.php): CRUD completo, paginação KnpPaginator e validação de integridade referencial.
    - [`RelatorioControllerTest`](file:///home/workspace/livros/tests/Functional/RelatorioControllerTest.php): Renderização da página analítica e validação do download de PDF (`Content-Type: application/pdf`, cabeçalho `%PDF-`).
 2. **Testes Unitários:**
    - Entidades e regras de domínio ([`LivroTest`](file:///home/workspace/livros/tests/Unit/Entity/LivroTest.php)).
-   - Serviços de negócio ([`LivroServiceTest`](file:///home/workspace/livros/tests/Unit/Service/LivroServiceTest.php), [`AutorServiceTest`](file:///home/workspace/livros/tests/Unit/Service/AutorServiceTest.php), [`AssuntoServiceTest`](file:///home/workspace/livros/tests/Unit/Service/AssuntoServiceTest.php), [`RelatorioServiceTest`](file:///home/workspace/livros/tests/Unit/Service/RelatorioServiceTest.php)).
+   - Serviços de negócio e paginação ([`LivroServiceTest`](file:///home/workspace/livros/tests/Unit/Service/LivroServiceTest.php), [`AutorServiceTest`](file:///home/workspace/livros/tests/Unit/Service/AutorServiceTest.php), [`AssuntoServiceTest`](file:///home/workspace/livros/tests/Unit/Service/AssuntoServiceTest.php), [`RelatorioServiceTest`](file:///home/workspace/livros/tests/Unit/Service/RelatorioServiceTest.php)).
    - Extensões Twig e formatação monetária ([`MoneyExtensionTest`](file:///home/workspace/livros/tests/Unit/Twig/MoneyExtensionTest.php)).
    - Componentes visuais do Symfony UX ([`ComponentsTest`](file:///home/workspace/livros/tests/Unit/Twig/ComponentsTest.php)).
 
@@ -122,7 +128,8 @@ Ao apresentar o projeto para a banca avaliadora, sugerimos seguir o seguinte rot
    - Demonstrar o comando `php bin/console app:seed --clean` que popula o catálogo com dados reais e co-autorias (*"Belas Maldições"* com Neil Gaiman e Terry Pratchett).
 3. **Tela Inicial e Navegação (`/`):**
    - Mostrar a tela inicial com os indicadores em tempo real e atalhos diretos para os módulos.
-4. **CRUDs e Validação:**
+4. **CRUDs, Validação e Paginação:**
+   - Demonstrar a paginação nativa com `KnpPaginatorBundle` limitada a 5 itens por página.
    - Demonstrar a máscara e validação de moeda no cadastro de livro (aceitando formato brasileiro `150,50` ou `R$ 150,50`).
    - Tentar excluir um autor vinculado a livros (ex: Machado de Assis) e mostrar o feedback de proteção (`EntityInUseException`).
 5. **Relatório Gerencial com VIEW SQL:**
@@ -131,7 +138,7 @@ Ao apresentar o projeto para a banca avaliadora, sugerimos seguir o seguinte rot
    - Demonstrar a tela web do relatório com gráficos interativos do Symfony UX Chart.js e agrupamento por autor.
    - Gerar o relatório corporativo em PDF com um clique.
 6. **Qualidade de Código & Testes:**
-   - Executar `docker compose exec app bin/phpunit` na frente dos avaliadores mostrando **100% de aprovação em 48 testes**.
+   - Executar `docker compose exec app bin/phpunit` na frente dos avaliadores mostrando **100% de aprovação em 54 testes**.
    - Rodar os linters do Symfony (`lint:container`, `lint:twig`, `lint:yaml`).
 
 ---

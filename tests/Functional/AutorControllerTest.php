@@ -16,6 +16,9 @@ class AutorControllerTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
+        $this->getEntityManager()->getConnection()->executeStatement(
+            'TRUNCATE TABLE "Livro_Autor", "Livro_Assunto", "Livro", "Autor", "Assunto" RESTART IDENTITY CASCADE'
+        );
     }
 
     private function getEntityManager(): EntityManagerInterface
@@ -131,5 +134,27 @@ class AutorControllerTest extends WebTestCase
         // Garante que o autor NÃO foi excluído
         $autorAindaExiste = $this->getEntityManager()->getRepository(Autor::class)->find($autorId);
         $this->assertNotNull($autorAindaExiste);
+    }
+
+    #[Test]
+    public function testPagination(): void
+    {
+        $em = $this->getEntityManager();
+        for ($i = 1; $i <= 7; ++$i) {
+            $autor = (new Autor())->setNome(sprintf('Autor %02d', $i));
+            $em->persist($autor);
+        }
+        $em->flush();
+
+        // Página 1 deve conter 5 itens (padrão KnpPaginator)
+        $crawler = $this->client->request('GET', '/autor/');
+        $this->assertResponseIsSuccessful();
+        $this->assertCount(5, $crawler->filter('tbody tr'));
+        $this->assertSelectorExists('.pagination');
+
+        // Página 2 deve conter os 2 itens restantes
+        $crawlerPage2 = $this->client->request('GET', '/autor/?page=2');
+        $this->assertResponseIsSuccessful();
+        $this->assertCount(2, $crawlerPage2->filter('tbody tr'));
     }
 }

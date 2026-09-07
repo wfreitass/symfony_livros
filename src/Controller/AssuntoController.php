@@ -19,10 +19,12 @@ class AssuntoController extends AbstractController
     ) {}
 
     #[Route('/', name: 'app_assunto_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $page = $request->query->getInt('page', 1);
+
         return $this->render('assunto/index.html.twig', [
-            'assuntos' => $this->assuntoService->listAll(),
+            'assuntos' => $this->assuntoService->listPaginated($page, 5),
         ]);
     }
 

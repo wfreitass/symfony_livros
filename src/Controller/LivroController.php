@@ -18,10 +18,12 @@ class LivroController extends AbstractController
     ) {}
 
     #[Route('/', name: 'app_livro_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $page = $request->query->getInt('page', 1);
+
         return $this->render('livro/index.html.twig', [
-            'livros' => $this->livroService->listAll(),
+            'livros' => $this->livroService->listPaginated($page, 5),
         ]);
     }
 

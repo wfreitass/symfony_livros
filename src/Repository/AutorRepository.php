@@ -42,6 +42,15 @@ class AutorRepository extends ServiceEntityRepository
     //    }
 
     /**
+     * Retorna QueryBuilder para paginação de autores ordenados por nome.
+     */
+    public function createAllOrderedByNameQueryBuilder(): \Doctrine\ORM\QueryBuilder
+    {
+        return $this->createQueryBuilder('a')
+            ->orderBy('a.nome', 'ASC');
+    }
+
+    /**
      * @return Autor[]
      */
     public function findAllOrderedByName(): array

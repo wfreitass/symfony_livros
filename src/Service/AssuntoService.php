@@ -7,12 +7,15 @@ use App\Entity\Assunto;
 use App\Exception\EntityInUseException;
 use App\Repository\AssuntoRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\Pagination\PaginationInterface;
+use Knp\Component\Pager\PaginatorInterface;
 
 class AssuntoService extends AbstractEntityService implements AssuntoServiceInterface
 {
     public function __construct(
         EntityManagerInterface $entityManager,
-        private readonly AssuntoRepository $assuntoRepository
+        private readonly AssuntoRepository $assuntoRepository,
+        private readonly PaginatorInterface $paginator
     ) {
         parent::__construct($entityManager);
     }
@@ -25,6 +28,18 @@ class AssuntoService extends AbstractEntityService implements AssuntoServiceInte
     public function listAll(): array
     {
         return $this->assuntoRepository->findAllOrderedByDescricao();
+    }
+
+    /**
+     * Retorna os assuntos paginados ordenados por descrição.
+     *
+     * @return PaginationInterface<int, Assunto>
+     */
+    public function listPaginated(int $page = 1, int $limit = 5): PaginationInterface
+    {
+        $qb = $this->assuntoRepository->createAllOrderedByDescricaoQueryBuilder();
+
+        return $this->paginator->paginate($qb, $page, $limit);
     }
 
     /**

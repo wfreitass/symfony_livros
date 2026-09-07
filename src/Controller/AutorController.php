@@ -19,10 +19,12 @@ class AutorController extends AbstractController
     ) {}
 
     #[Route('/', name: 'app_autor_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $page = $request->query->getInt('page', 1);
+
         return $this->render('autor/index.html.twig', [
-            'autores' => $this->autorService->listAll(),
+            'autores' => $this->autorService->listPaginated($page, 5),
         ]);
     }
 

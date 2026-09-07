@@ -42,6 +42,15 @@ class AssuntoRepository extends ServiceEntityRepository
     //    }
 
     /**
+     * Retorna QueryBuilder para paginação de assuntos ordenados por descrição.
+     */
+    public function createAllOrderedByDescricaoQueryBuilder(): \Doctrine\ORM\QueryBuilder
+    {
+        return $this->createQueryBuilder('s')
+            ->orderBy('s.descricao', 'ASC');
+    }
+
+    /**
      * @return Assunto[]
      */
     public function findAllOrderedByDescricao(): array

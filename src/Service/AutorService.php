@@ -7,12 +7,15 @@ use App\Entity\Autor;
 use App\Exception\EntityInUseException;
 use App\Repository\AutorRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\Pagination\PaginationInterface;
+use Knp\Component\Pager\PaginatorInterface;
 
 class AutorService extends AbstractEntityService implements AutorServiceInterface
 {
     public function __construct(
         EntityManagerInterface $entityManager,
-        private readonly AutorRepository $autorRepository
+        private readonly AutorRepository $autorRepository,
+        private readonly PaginatorInterface $paginator
     ) {
         parent::__construct($entityManager);
     }
@@ -25,6 +28,18 @@ class AutorService extends AbstractEntityService implements AutorServiceInterfac
     public function listAll(): array
     {
         return $this->autorRepository->findAllOrderedByName();
+    }
+
+    /**
+     * Retorna os autores paginados ordenados por nome.
+     *
+     * @return PaginationInterface<int, Autor>
+     */
+    public function listPaginated(int $page = 1, int $limit = 5): PaginationInterface
+    {
+        $qb = $this->autorRepository->createAllOrderedByNameQueryBuilder();
+
+        return $this->paginator->paginate($qb, $page, $limit);
     }
 
     /**

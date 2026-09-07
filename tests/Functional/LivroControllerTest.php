@@ -17,6 +17,9 @@ class LivroControllerTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
+        $this->getEntityManager()->getConnection()->executeStatement(
+            'TRUNCATE TABLE "Livro_Autor", "Livro_Assunto", "Livro", "Autor", "Assunto" RESTART IDENTITY CASCADE'
+        );
     }
 
     private function getEntityManager(): EntityManagerInterface
@@ -144,5 +147,39 @@ class LivroControllerTest extends WebTestCase
 
         $deletedLivro = $this->getEntityManager()->getRepository(Livro::class)->find($livroId);
         $this->assertNull($deletedLivro);
+    }
+
+    #[Test]
+    public function testPagination(): void
+    {
+        $em = $this->getEntityManager();
+        $autor = (new Autor())->setNome('Autor Paginacao');
+        $assunto = (new Assunto())->setDescricao('Assunto Paginacao');
+        $em->persist($autor);
+        $em->persist($assunto);
+
+        for ($i = 1; $i <= 7; ++$i) {
+            $livro = (new Livro())
+                ->setTitulo(sprintf('Livro Paginado %02d', $i))
+                ->setEditora('Editora Teste')
+                ->setEdicao(1)
+                ->setAnoPublicacao('2024')
+                ->setValor('29.90')
+                ->addAutor($autor)
+                ->addAssunto($assunto);
+            $em->persist($livro);
+        }
+        $em->flush();
+
+        // Página 1 deve conter 5 livros (padrão KnpPaginator)
+        $crawler = $this->client->request('GET', '/livro/');
+        $this->assertResponseIsSuccessful();
+        $this->assertCount(5, $crawler->filter('tbody tr'));
+        $this->assertSelectorExists('.pagination');
+
+        // Página 2 deve conter os 2 livros restantes
+        $crawlerPage2 = $this->client->request('GET', '/livro/?page=2');
+        $this->assertResponseIsSuccessful();
+        $this->assertCount(2, $crawlerPage2->filter('tbody tr'));
     }
 }
