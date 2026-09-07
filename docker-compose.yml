@@ -1,0 +1,60 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: livros_app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - livros_network
+
+  web:
+    image: nginx:alpine
+    container_name: livros_web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - livros_network
+
+  db:
+    image: postgres:16-alpine
+    container_name: livros_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: livros_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: secret_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - livros_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user -d livros_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+
+networks:
+  livros_network:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local
+###> doctrine/doctrine-bundle ###
+  database_data:
+###< doctrine/doctrine-bundle ###
