@@ -7,7 +7,9 @@ use App\Twig\Components\Button;
 use App\Twig\Components\Card;
 use App\Twig\Components\Navbar;
 use App\Twig\Components\PageHeader;
+use App\Twig\Components\Pagination;
 use App\Twig\Components\Table;
+use Knp\Component\Pager\Pagination\PaginationInterface;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -150,5 +152,45 @@ class ComponentsTest extends TestCase
 
         $table->colspan = 5;
         $this->assertSame(5, $table->getEffectiveColspan());
+    }
+
+    #[Test]
+    public function testPaginationComponentDefaultsAndCalculations(): void
+    {
+        $comp = new Pagination();
+        $this->assertNull($comp->pagination);
+        $this->assertSame('itens', $comp->itemName);
+        $this->assertTrue($comp->borderTop);
+        $this->assertSame('', $comp->class);
+        $this->assertFalse($comp->hasItems());
+        $this->assertSame(0, $comp->getFromItem());
+        $this->assertSame(0, $comp->getToItem());
+        $this->assertSame(0, $comp->getTotal());
+
+        // Simula página 2 com 5 itens de um total de 12
+        $pagination = $this->createStub(PaginationInterface::class);
+        $pagination->method('getCurrentPageNumber')->willReturn(2);
+        $pagination->method('getItemNumberPerPage')->willReturn(5);
+        $pagination->method('getTotalItemCount')->willReturn(12);
+        $pagination->method('count')->willReturn(5);
+
+        $comp->pagination = $pagination;
+        $comp->itemName = 'livros';
+        $this->assertTrue($comp->hasItems());
+        $this->assertSame(6, $comp->getFromItem());
+        $this->assertSame(10, $comp->getToItem());
+        $this->assertSame(12, $comp->getTotal());
+
+        // Simula última página (página 3 com 2 itens)
+        $paginationLast = $this->createStub(PaginationInterface::class);
+        $paginationLast->method('getCurrentPageNumber')->willReturn(3);
+        $paginationLast->method('getItemNumberPerPage')->willReturn(5);
+        $paginationLast->method('getTotalItemCount')->willReturn(12);
+        $paginationLast->method('count')->willReturn(2);
+
+        $comp->pagination = $paginationLast;
+        $this->assertSame(11, $comp->getFromItem());
+        $this->assertSame(12, $comp->getToItem());
+        $this->assertSame(12, $comp->getTotal());
     }
 }

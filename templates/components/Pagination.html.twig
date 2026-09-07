@@ -1,0 +1,10 @@
+{% if this.hasItems %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3 pt-3 {{ borderTop ? 'border-top' : '' }} gap-2 {{ class }}">
+    <div class="text-muted small">
+        Mostrando <strong>{{ this.fromItem }}</strong> a <strong>{{ this.toItem }}</strong> de <strong>{{ this.total }}</strong> {{ itemName }}
+    </div>
+    <div class="navigation mb-0">
+        {{ knp_pagination_render(pagination) }}
+    </div>
+</div>
+{% endif %}

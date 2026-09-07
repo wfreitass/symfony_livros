@@ -5,7 +5,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
-[![PHPUnit](https://img.shields.io/badge/Tests-54%20Passed-3776AB?logo=pytest&logoColor=white)](https://phpunit.de/)
+[![PHPUnit](https://img.shields.io/badge/Tests-55%20Passed-3776AB?logo=pytest&logoColor=white)](https://phpunit.de/)
 
 Sistema corporativo para cadastro e controle de acervo de livros, autores e assuntos com dashboard executivo, gráficos analíticos interativos e exportação de relatórios em PDF, desenvolvido como solução para o Desafio Técnico de Engenharia de Software.
 
@@ -37,7 +37,7 @@ O projeto foi concebido seguindo os princípios de **Clean Code**, **SOLID**, **
 - **Exportação em PDF:** Geração de documento corporativo em formato A4 utilizando **Dompdf**, com sumário executivo, KPIs e detalhamento das obras agrupadas por autor.
 
 ### 5. Componentes Reutilizáveis com Symfony UX Twig Component
-- Componentização declarativa oficial do Symfony UX (`<twig:PageHeader>`, `<twig:Card>`, `<twig:Table>`, `<twig:Button>`, `<twig:Navbar>`, `<twig:Alert>`).
+- Componentização declarativa oficial do Symfony UX (`<twig:PageHeader>`, `<twig:Card>`, `<twig:Table>`, `<twig:Button>`, `<twig:Navbar>`, `<twig:Alert>`, `<twig:Pagination>`).
 - Redução drástica de repetição de HTML nos templates com parametrização tipada no PHP (`#[AsTwigComponent]`).
 
 ### 6. Resiliência e Integridade de Dados
@@ -96,7 +96,7 @@ Abra no seu navegador:
 
 ## 🧪 Suíte de Testes Automatizados (TDD)
 
-O projeto conta com **54 testes e 260 asserções** cobrindo testes unitários e testes funcionais HTTP de ponta a ponta:
+O projeto conta com **55 testes e 275 asserções** cobrindo testes unitários e testes funcionais HTTP de ponta a ponta:
 
 ```bash
 docker compose exec app bin/phpunit
@@ -129,7 +129,7 @@ Ao apresentar o projeto para a banca avaliadora, sugerimos seguir o seguinte rot
 3. **Tela Inicial e Navegação (`/`):**
    - Mostrar a tela inicial com os indicadores em tempo real e atalhos diretos para os módulos.
 4. **CRUDs, Validação e Paginação:**
-   - Demonstrar a paginação nativa com `KnpPaginatorBundle` limitada a 5 itens por página.
+   - Demonstrar a paginação nativa com `KnpPaginatorBundle` limitada a 5 itens por página via componente `<twig:Pagination>`.
    - Demonstrar a máscara e validação de moeda no cadastro de livro (aceitando formato brasileiro `150,50` ou `R$ 150,50`).
    - Tentar excluir um autor vinculado a livros (ex: Machado de Assis) e mostrar o feedback de proteção (`EntityInUseException`).
 5. **Relatório Gerencial com VIEW SQL:**
@@ -138,7 +138,7 @@ Ao apresentar o projeto para a banca avaliadora, sugerimos seguir o seguinte rot
    - Demonstrar a tela web do relatório com gráficos interativos do Symfony UX Chart.js e agrupamento por autor.
    - Gerar o relatório corporativo em PDF com um clique.
 6. **Qualidade de Código & Testes:**
-   - Executar `docker compose exec app bin/phpunit` na frente dos avaliadores mostrando **100% de aprovação em 54 testes**.
+   - Executar `docker compose exec app bin/phpunit` na frente dos avaliadores mostrando **100% de aprovação em 55 testes**.
    - Rodar os linters do Symfony (`lint:container`, `lint:twig`, `lint:yaml`).
 
 ---
