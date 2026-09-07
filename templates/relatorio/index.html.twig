@@ -82,40 +82,37 @@
 
 {% for autor in dados %}
 <twig:Card title="{{ autor.nome }}" icon="bi-person-badge">
-    <div class="table-responsive">
-        <table class="table table-sm table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th style="width: 70px;">Cód.</th>
-                    <th>Título</th>
-                    <th>Editora</th>
-                    <th class="text-center" style="width: 80px;">Edição</th>
-                    <th class="text-center" style="width: 90px;">Ano</th>
-                    <th class="text-end" style="width: 130px;">Valor</th>
-                    <th>Assuntos / Gêneros</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for livro in autor.livros %}
-                <tr>
-                    <td class="text-muted">#{{ livro.id }}</td>
-                    <td class="fw-semibold text-dark">{{ livro.titulo }}</td>
-                    <td>{{ livro.editora }}</td>
-                    <td class="text-center">{{ livro.edicao }}ª</td>
-                    <td class="text-center">{{ livro.anoPublicacao }}</td>
-                    <td class="text-end fw-bold text-success">{{ livro.valor|money_br }}</td>
-                    <td>
-                        {% for assunto in livro.assuntos %}
-                        <span class="badge bg-light text-dark border me-1">{{ assunto }}</span>
-                        {% else %}
-                        <span class="text-muted small">Nenhum</span>
-                        {% endfor %}
-                    </td>
-                </tr>
+    <twig:Table
+        size="sm"
+        class="mb-0"
+        :columns="[
+            { label: 'Cód.', width: '70px' },
+            { label: 'Título' },
+            { label: 'Editora' },
+            { label: 'Edição', class: 'text-center', width: '80px' },
+            { label: 'Ano', class: 'text-center', width: '90px' },
+            { label: 'Valor', class: 'text-end', width: '130px' },
+            { label: 'Assuntos / Gêneros' }
+        ]"
+    >
+        {% for livro in autor.livros %}
+        <tr>
+            <td class="text-muted">#{{ livro.id }}</td>
+            <td class="fw-semibold text-dark">{{ livro.titulo }}</td>
+            <td>{{ livro.editora }}</td>
+            <td class="text-center">{{ livro.edicao }}ª</td>
+            <td class="text-center">{{ livro.anoPublicacao }}</td>
+            <td class="text-end fw-bold text-success">{{ livro.valor|money_br }}</td>
+            <td>
+                {% for assunto in livro.assuntos %}
+                <span class="badge bg-light text-dark border me-1">{{ assunto }}</span>
+                {% else %}
+                <span class="text-muted small">Nenhum</span>
                 {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </twig:Table>
 </twig:Card>
 {% else %}
 <twig:Card title="Relatório">

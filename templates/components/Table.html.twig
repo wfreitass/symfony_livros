@@ -1,0 +1,44 @@
+{%- set customHeader -%}
+    {%- block header -%}{%- endblock -%}
+{%- endset -%}
+
+{%- set contentHtml -%}
+    {%- block content -%}{%- endblock -%}
+{%- endset -%}
+
+{% if responsive %}<div class="table-responsive">{% endif %}
+    <table {{ attributes.defaults({ class: this.classes }) }}>
+        {% if customHeader|trim is not empty %}
+            <thead class="{{ theadClass }}">
+                {{ customHeader|raw }}
+            </thead>
+        {% elseif columns|length > 0 %}
+            <thead class="{{ theadClass }}">
+                <tr>
+                    {% for col in columns %}
+                        {% if col is iterable %}
+                            <th{% if col.width is defined %} style="width: {{ col.width }};"{% endif %}{% if col.class is defined %} class="{{ col.class }}"{% endif %}>
+                                {{- col.label|default('') -}}
+                            </th>
+                        {% else %}
+                            <th>{{ col }}</th>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            </thead>
+        {% endif %}
+
+        <tbody>
+            {% if items is not null and items|length == 0 %}
+                <tr>
+                    <td colspan="{{ this.effectiveColspan }}" class="text-center py-5 text-muted">
+                        <i class="bi {{ emptyIcon }} fs-1 d-block mb-2"></i>
+                        {{ emptyMessage|default('Nenhum registro encontrado.') }}
+                    </td>
+                </tr>
+            {% else %}
+                {{ contentHtml|raw }}
+            {% endif %}
+        </tbody>
+    </table>
+{% if responsive %}</div>{% endif %}

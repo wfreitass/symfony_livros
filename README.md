@@ -119,27 +119,5 @@ livros/
 └── Dockerfile               # Imagem PHP 8.4-FPM
 ```
 
----
 
-## 🎤 Roteiro Sugerido para a Apresentação Técnica
 
-Ao conduzir a entrevista técnica com a banca avaliadora, sugerimos seguir esta ordem:
-
-1. **Apresentação da Arquitetura & Stack:**
-   - Explicar a escolha de rodar no Docker com PHP 8.4 e PostgreSQL 16.
-   - Mostrar a fidelidade ao modelo de dados exigido, destacando como o Doctrine mapeia tabelas/colunas legadas preservando o padrão de código PSR.
-2. **Demonstração do Banco de Dados & VIEW SQL:**
-   - Mostrar o arquivo de migration que cria as tabelas com integridade referencial e a **`vw_relatorio_livros`**.
-3. **Demonstração Funcional dos CRUDs:**
-   - Cadastrar Autores e Assuntos.
-   - Cadastrar um Livro associando múltiplos autores e assuntos.
-   - Mostrar o funcionamento da máscara e conversão do campo **Valor (R$)** via `DataTransformer`.
-   - Tentar excluir um autor vinculado a um livro para demonstrar o tratamento específico de integridade referencial (`ForeignKeyConstraintViolationException`).
-4. **Demonstração do Relatório Gerencial & Estatísticas:**
-   - Acessar o menu **Relatório**.
-   - Mostrar que os dados vêm diretamente da **VIEW SQL**.
-   - Destacar os gráficos analíticos gerados nativamente com **Symfony UX Chart.js**.
-   - Clicar em **Exportar Relatório em PDF** para demonstrar a geração do relatório em formato A4 via Dompdf.
-5. **Qualidade de Código & Testes Automatizados:**
-   - Rodar a suíte de testes no terminal (`bin/phpunit`).
-   - Mostrar os testes unitários e funcionais passando 100% verdes.

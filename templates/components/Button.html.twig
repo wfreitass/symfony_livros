@@ -1,0 +1,15 @@
+{%- set contentHtml -%}
+    {%- block content -%}{{- label -}}{%- endblock -%}
+{%- endset -%}
+
+{%- if href -%}
+<a href="{{ href }}" {{ attributes.defaults({ class: this.classes }) }}>
+    {%- if icon -%}<i class="bi {{ icon }}{{ contentHtml|trim ? ' me-1' : '' }}"></i>{%- endif -%}
+    {{- contentHtml|trim|raw -}}
+</a>
+{%- else -%}
+<button type="{{ type }}" {{ disabled ? 'disabled' : '' }} {{ attributes.defaults({ class: this.classes }) }}>
+    {%- if icon -%}<i class="bi {{ icon }}{{ contentHtml|trim ? ' me-1' : '' }}"></i>{%- endif -%}
+    {{- contentHtml|trim|raw -}}
+</button>
+{%- endif -%}

@@ -45,6 +45,7 @@ docker-compose.override.yml
 .Trashes
 ehthumbs.db
 Thumbs.db
+*:Zone.Identifier
 
 # Testes, cobertura e ferramentas de qualidade (QA)
 .phpunit.result.cache
@@ -76,4 +77,9 @@ pnpm-debug.log*
 *.pem
 *.key
 *.crt
+
+# Documentos locais e especificações
+*.docx
+Teste-Tecnico_TJJUD*
+
 

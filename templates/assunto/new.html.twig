@@ -12,10 +12,8 @@
             {{ form_start(form) }}
             {{ form_row(form.descricao) }}
             <div class="d-flex justify-content-end gap-2 mt-4">
-                <a href="{{ path('app_assunto_index') }}" class="btn btn-light border">Cancelar</a>
-                <button type="submit" class="btn btn-success">
-                    <i class="bi bi-check-lg me-1"></i> Salvar Assunto
-                </button>
+                <twig:Button href="{{ path('app_assunto_index') }}" variant="light" label="Cancelar" />
+                <twig:Button type="submit" variant="success" icon="bi-check-lg" label="Salvar Assunto" />
             </div>
             {{ form_end(form) }}
         </twig:Card>

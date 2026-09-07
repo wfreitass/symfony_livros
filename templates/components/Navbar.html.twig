@@ -1,0 +1,39 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{{ path(brandRoute) }}">
+            {% if brandIcon %}<i class="bi {{ brandIcon }} me-2"></i>{% endif %}{{ brand }}
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link {{ this.isRouteActive('app_livro') ? 'active fw-semibold' : '' }}"
+                        href="{{ path('app_livro_index') }}">
+                        <i class="bi bi-journal-text me-1"></i> Livros
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ this.isRouteActive('app_autor') ? 'active fw-semibold' : '' }}"
+                        href="{{ path('app_autor_index') }}">
+                        <i class="bi bi-person me-1"></i> Autores
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ this.isRouteActive('app_assunto') ? 'active fw-semibold' : '' }}"
+                        href="{{ path('app_assunto_index') }}">
+                        <i class="bi bi-tags me-1"></i> Assuntos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-warning {{ this.isRouteActive('app_relatorio') ? 'active fw-bold' : '' }}"
+                        href="{{ path('app_relatorio_index') }}">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Relatório
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
