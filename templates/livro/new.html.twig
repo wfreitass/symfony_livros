@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Novo Livro{% endblock %}
+
+{% block body %}
+<twig:PageHeader title="Novo Livro" subtitle="Cadastrar uma nova obra no acervo"
+    :actions="[{ label: 'Voltar para Lista', url: path('app_livro_index'), icon: 'bi-arrow-left', class: 'btn-outline-secondary' }]" />
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <twig:Card title="Dados da Obra" icon="bi-journal-plus">
+            {{ include('livro/_form.html.twig', {'button_label': 'Salvar Livro'}) }}
+        </twig:Card>
+    </div>
+</div>
+{% endblock %}

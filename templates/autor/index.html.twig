@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Autores{% endblock %}
+
+{% block body %}
+<twig:PageHeader title="Autores" subtitle="Gerenciamento de autores cadastrados no acervo"
+    :actions="[{ label: 'Novo Autor', url: path('app_autor_new'), icon: 'bi-plus-lg', class: 'btn-primary' }]" />
+
+<twig:Card title="Lista de Autores" icon="bi-people">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 100px;">Código</th>
+                    <th>Nome</th>
+                    <th class="text-end" style="width: 180px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for autor in autores %}
+                <tr>
+                    <td class="fw-semibold text-muted">#{{ autor.id }}</td>
+                    <td class="fw-bold">{{ autor.nome }}</td>
+                    <td class="text-end">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ path('app_autor_edit', {'id': autor.id}) }}"
+                                class="btn btn-sm btn-outline-secondary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="post" action="{{ path('app_autor_delete', {'id': autor.id}) }}"
+                                onsubmit="return confirm('Deseja realmente excluir este autor?');" class="d-inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ autor.id) }}">
+                                <button class="btn btn-sm btn-outline-danger" title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        Nenhum autor cadastrado até o momento.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</twig:Card>
+{% endblock %}

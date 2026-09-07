@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Editar Autor{% endblock %}
+
+{% block body %}
+<twig:PageHeader title="Editar Autor" subtitle="Atualizar dados do autor #{{ autor.id }}"
+    :actions="[{ label: 'Voltar para Lista', url: path('app_autor_index'), icon: 'bi-arrow-left', class: 'btn-outline-secondary' }]" />
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <twig:Card title="Alteração de Dados" icon="bi-person-gear">
+            {{ form_start(form) }}
+            {{ form_row(form.nome) }}
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{{ path('app_autor_index') }}" class="btn btn-light border">Cancelar</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i> Atualizar Autor
+                </button>
+            </div>
+            {{ form_end(form) }}
+        </twig:Card>
+    </div>
+</div>
+{% endblock %}

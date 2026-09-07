@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Novo Assunto{% endblock %}
+
+{% block body %}
+<twig:PageHeader title="Novo Assunto" subtitle="Cadastrar novo assunto ou categoria"
+    :actions="[{ label: 'Voltar para Lista', url: path('app_assunto_index'), icon: 'bi-arrow-left', class: 'btn-outline-secondary' }]" />
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <twig:Card title="Dados do Assunto" icon="bi-tag">
+            {{ form_start(form) }}
+            {{ form_row(form.descricao) }}
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{{ path('app_assunto_index') }}" class="btn btn-light border">Cancelar</a>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-lg me-1"></i> Salvar Assunto
+                </button>
+            </div>
+            {{ form_end(form) }}
+        </twig:Card>
+    </div>
+</div>
+{% endblock %}

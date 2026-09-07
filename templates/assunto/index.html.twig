@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Assuntos{% endblock %}
+
+{% block body %}
+<twig:PageHeader title="Assuntos" subtitle="Gerenciamento de assuntos e gêneros de livros"
+    :actions="[{ label: 'Novo Assunto', url: path('app_assunto_new'), icon: 'bi-plus-lg', class: 'btn-primary' }]" />
+
+<twig:Card title="Lista de Assuntos" icon="bi-tags">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 100px;">Código</th>
+                    <th>Descrição</th>
+                    <th class="text-end" style="width: 180px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assunto in assuntos %}
+                <tr>
+                    <td class="fw-semibold text-muted">#{{ assunto.id }}</td>
+                    <td class="fw-bold">{{ assunto.descricao }}</td>
+                    <td class="text-end">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ path('app_assunto_edit', {'id': assunto.id}) }}"
+                                class="btn btn-sm btn-outline-secondary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="post" action="{{ path('app_assunto_delete', {'id': assunto.id}) }}"
+                                onsubmit="return confirm('Deseja realmente excluir este assunto?');" class="d-inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ assunto.id) }}">
+                                <button class="btn btn-sm btn-outline-danger" title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        Nenhum assunto cadastrado até o momento.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</twig:Card>
+{% endblock %}

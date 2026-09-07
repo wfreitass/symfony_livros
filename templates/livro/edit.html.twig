@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Editar Livro{% endblock %}
+
+{% block body %}
+<twig:PageHeader title="Editar Livro" subtitle="Alterar dados do livro #{{ livro.id }} - {{ livro.titulo }}"
+    :actions="[{ label: 'Voltar para Lista', url: path('app_livro_index'), icon: 'bi-arrow-left', class: 'btn-outline-secondary' }]" />
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <twig:Card title="Alteração da Obra" icon="bi-journal-check">
+            {{ include('livro/_form.html.twig', {'button_label': 'Atualizar Livro'}) }}
+        </twig:Card>
+    </div>
+</div>
+{% endblock %}

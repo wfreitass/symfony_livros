@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Livros{% endblock %}
+
+{% block body %}
+<twig:PageHeader title="Acervo de Livros" subtitle="Listagem e gestão dos livros cadastrados no sistema"
+    :actions="[{ label: 'Novo Livro', url: path('app_livro_new'), icon: 'bi-plus-lg', class: 'btn-primary' }]" />
+
+<twig:Card title="Livros Cadastrados" icon="bi-book">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 70px;">Cód.</th>
+                    <th>Título</th>
+                    <th>Editora</th>
+                    <th class="text-center" style="width: 80px;">Edição</th>
+                    <th class="text-center" style="width: 90px;">Ano</th>
+                    <th class="text-end" style="width: 120px;">Valor</th>
+                    <th>Autores</th>
+                    <th>Assuntos</th>
+                    <th class="text-end" style="width: 140px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for livro in livros %}
+                <tr>
+                    <td class="fw-semibold text-muted">#{{ livro.id }}</td>
+                    <td class="fw-bold text-dark">{{ livro.titulo }}</td>
+                    <td>{{ livro.editora }}</td>
+                    <td class="text-center">{{ livro.edicao }}ª</td>
+                    <td class="text-center">{{ livro.anoPublicacao }}</td>
+                    <td class="text-end fw-bold text-success">{{ livro.valor|money_br }}</td>
+                    <td>
+                        {% for autor in livro.autores %}
+                        <span class="badge bg-secondary mb-1">{{ autor.nome }}</span>
+                        {% else %}
+                        <span class="text-muted small">Nenhum</span>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for assunto in livro.assuntos %}
+                        <span class="badge bg-info text-dark mb-1">{{ assunto.descricao }}</span>
+                        {% else %}
+                        <span class="text-muted small">Nenhum</span>
+                        {% endfor %}
+                    </td>
+                    <td class="text-end">
+                        <div class="d-flex justify-content-end gap-1">
+                            <a href="{{ path('app_livro_edit', {'id': livro.id}) }}"
+                                class="btn btn-sm btn-outline-secondary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="post" action="{{ path('app_livro_delete', {'id': livro.id}) }}"
+                                onsubmit="return confirm('Deseja realmente excluir este livro?');" class="d-inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ livro.id) }}">
+                                <button class="btn btn-sm btn-outline-danger" title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center py-5 text-muted">
+                        <i class="bi bi-journal-x fs-1 d-block mb-2"></i>
+                        Nenhum livro cadastrado até o momento.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</twig:Card>
+{% endblock %}

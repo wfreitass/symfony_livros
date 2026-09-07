@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Relatório de Livros por Autor{% endblock %}
+
+{% block body %}
+<twig:PageHeader title="Relatório de Livros por Autor"
+    subtitle="Dados consolidados diretamente da VIEW SQL do banco de dados" :actions="[
+            { label: 'Exportar PDF', url: path('app_relatorio_pdf'), icon: 'bi-file-earmark-pdf', class: 'btn-danger' }
+        ]" />
+
+<!-- Cards de Métricas -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-primary text-white">
+            <div class="card-body">
+                <h6 class="text-white-50 text-uppercase fw-bold small">Total de Autores</h6>
+                <h3 class="fw-bold mb-0">{{ totalAutores }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-secondary text-white">
+            <div class="card-body">
+                <h6 class="text-white-50 text-uppercase fw-bold small">Livros Vinculados</h6>
+                <h3 class="fw-bold mb-0">{{ totalObras }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-success text-white">
+            <div class="card-body">
+                <h6 class="text-white-50 text-uppercase fw-bold small">Valor Total do Acervo</h6>
+                <h3 class="fw-bold mb-0">{{ valorTotal|money_br }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela Agrupada por Autor -->
+{% for autor in dados %}
+<twig:Card title="{{ autor.nome }}" icon="bi-person-badge">
+    <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 70px;">Cód.</th>
+                    <th>Título</th>
+                    <th>Editora</th>
+                    <th class="text-center" style="width: 80px;">Edição</th>
+                    <th class="text-center" style="width: 90px;">Ano</th>
+                    <th class="text-end" style="width: 120px;">Valor</th>
+                    <th>Assuntos / Gêneros</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for livro in autor.livros %}
+                <tr>
+                    <td class="text-muted">#{{ livro.id }}</td>
+                    <td class="fw-semibold text-dark">{{ livro.titulo }}</td>
+                    <td>{{ livro.editora }}</td>
+                    <td class="text-center">{{ livro.edicao }}ª</td>
+                    <td class="text-center">{{ livro.anoPublicacao }}</td>
+                    <td class="text-end fw-bold text-success">{{ livro.valor|money_br }}</td>
+                    <td>
+                        {% for assunto in livro.assuntos %}
+                        <span class="badge bg-light text-dark border">{{ assunto }}</span>
+                        {% else %}
+                        <span class="text-muted small">Sem assunto</span>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</twig:Card>
+{% else %}
+<twig:Card title="Relatório">
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-file-earmark-x fs-1 d-block mb-2"></i>
+        Nenhum dado encontrado na View do banco. Cadastre autores, livros e assuntos para visualizar o relatório.
+    </div>
+</twig:Card>
+{% endfor %}
+{% endblock %}

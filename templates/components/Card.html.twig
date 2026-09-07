@@ -1,0 +1,15 @@
+{% props title = null, icon = null %}
+
+<div class="card shadow-sm border-0 mb-4">
+    {% if title %}
+    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
+        {% if icon %}
+        <i class="bi {{ icon }} text-primary me-2 fs-5"></i>
+        {% endif %}
+        <h6 class="m-0 fw-bold text-dark">{{ title }}</h6>
+    </div>
+    {% endif %}
+    <div class="card-body">
+        {{ block('content') ?? '' }}
+    </div>
+</div>
