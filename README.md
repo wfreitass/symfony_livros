@@ -34,7 +34,7 @@ O projeto foi concebido seguindo os princípios de **Clean Code**, **SOLID**, **
 - **Versionamento via Migrations:** Criação da view `vw_relatorio_livros` diretamente no PostgreSQL via Doctrine Migrations.
 - **Agrupamento por Autor com Co-autorias:** A consulta é executada via Doctrine DBAL pelo `RelatorioService`, agrupando as obras por autor e tratando cenários onde um livro possui múltiplos autores e múltiplos assuntos sem redundância incorreta.
 - **Gráficos Nativos Symfony UX Chart.js:** Configurados no PHP via `ChartBuilderInterface` e renderizados de forma reativa pelo Symfony UX / Stimulus.
-- **Exportação em PDF:** Geração de documento corporativo em formato A4 utilizando **Dompdf**, com sumário executivo, KPIs e distribuição percentual de acervo.
+- **Exportação em PDF:** Geração de documento corporativo em formato A4 utilizando **Dompdf**, com sumário executivo, KPIs e detalhamento das obras agrupadas por autor.
 
 ### 5. Componentes Reutilizáveis com Symfony UX Twig Component
 - Componentização declarativa oficial do Symfony UX (`<twig:PageHeader>`, `<twig:Card>`, `<twig:Table>`, `<twig:Button>`, `<twig:Navbar>`, `<twig:Alert>`).

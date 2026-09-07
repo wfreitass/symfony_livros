@@ -121,20 +121,6 @@
             text-align: right;
         }
 
-        /* Barra de Progresso Visual em CSS */
-        .bar-container {
-            background-color: #e9ecef;
-            border-radius: 3px;
-            height: 10px;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .bar-fill {
-            background-color: #0d6efd;
-            height: 100%;
-        }
-
         /* Seção por Autor */
         .autor-section {
             margin-bottom: 14px;
@@ -203,32 +189,25 @@
         </tr>
     </table>
 
-    <!-- 2. Sumário Estatístico e Distribuição de Obras por Autor -->
+    <!-- 2. Resumo Estatístico de Obras por Autor -->
     {% if metricas.autores.labels|length > 0 %}
     <div class="section-title">1. Resumo Estatístico de Obras por Autor</div>
     <table>
         <thead>
             <tr>
-                <th style="width: 35%;">Autor</th>
-                <th class="text-center" style="width: 15%;">Qtd. Obras</th>
-                <th class="text-right" style="width: 20%;">Valor Total (R$)</th>
-                <th style="width: 30%;">Distribuição</th>
+                <th style="width: 50%;">Autor</th>
+                <th class="text-center" style="width: 20%;">Qtd. Obras</th>
+                <th class="text-right" style="width: 30%;">Valor Total (R$)</th>
             </tr>
         </thead>
         <tbody>
             {% for i, autorNome in metricas.autores.labels %}
             {% set qtd = metricas.autores.quantidades[i] %}
             {% set val = metricas.autores.valores[i] %}
-            {% set percentual = totalObras > 0 ? ((qtd / totalObras) * 100)|round : 0 %}
             <tr>
                 <td><strong>{{ autorNome }}</strong></td>
                 <td class="text-center">{{ qtd }}</td>
                 <td class="text-right" style="color: #198754; font-weight: bold;">{{ val|money_br }}</td>
-                <td>
-                    <div class="bar-container">
-                        <div class="bar-fill" style="width: {{ percentual }}%;"></div>
-                    </div>
-                </td>
             </tr>
             {% endfor %}
         </tbody>
