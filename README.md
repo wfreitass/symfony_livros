@@ -5,49 +5,52 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
-[![PHPUnit](https://img.shields.io/badge/Tests-PHPUnit-3776AB?logo=pytest&logoColor=white)](https://phpunit.de/)
+[![PHPUnit](https://img.shields.io/badge/Tests-48%20Passed-3776AB?logo=pytest&logoColor=white)](https://phpunit.de/)
 
-Sistema completo para cadastro de acervo de livros, autores e assuntos com dashboard executivo, gráficos analíticos e exportação em PDF, desenvolvido como solução para o Desafio Técnico de Engenharia de Software.
+Sistema corporativo para cadastro e controle de acervo de livros, autores e assuntos com dashboard executivo, gráficos analíticos interativos e exportação de relatórios em PDF, desenvolvido como solução para o Desafio Técnico de Engenharia de Software.
 
 ---
 
 ## 🎯 Destaques e Decisões de Arquitetura
 
-O projeto foi concebido seguindo os princípios de **Clean Code**, **SOLID** e as melhores práticas do ecossistema PHP moderno:
+O projeto foi concebido seguindo os princípios de **Clean Code**, **SOLID**, **Service Layer** e as melhores práticas do ecossistema Symfony/PHP moderno:
 
-### 1. Modelagem Fiel ao Legado com Código Moderno
-- **Fidelidade ao Esquema:** Mapeamento integral dos nomes de tabelas e colunas exigidos no modelo relacional original (`Autor`, `Livro`, `Assunto`, `CodAu`, `Codl`, `codAs`, `Livro_Autor`, `Livro_Assunto`).
-- **PSR-12 & Clean Code:** No código PHP foram mantidas as convenções modernas (`$id`, `$titulo`, `$anoPublicacao`, métodos camelCase), mapeadas via atributos nativos do Doctrine ORM (`#[ORM\Column(name: '`Codl`')]`).
-- **Requisito 21 (Valor do Livro):** Campo de valor monetário adicionado como `DECIMAL(10,2)` no PostgreSQL, com validação de formato e integridade.
+### 1. Service Layer & Dependency Inversion (SOLID)
+- **Controllers Enxutos (Thin Controllers):** Os controllers são responsáveis apenas por receber as requisições HTTP, delegar as regras para os serviços de aplicação e retornar as respostas correspondentes.
+- **Interfaces & Contratos:** Os controllers dependem exclusivamente de interfaces (`LivroServiceInterface`, `AutorServiceInterface`, `AssuntoServiceInterface`, `RelatorioServiceInterface`, `PdfServiceInterface`), permitindo fácil substituição e desacoplamento para testes.
+- **Classe Base Genérica:** Implementação de `AbstractEntityService` com encapsulamento de persistência e tratamento cirúrgico de exceções.
 
-### 2. Relatório Gerencial Obrigatório com VIEW SQL Nativa (Requisito 17)
-- **Consulta via VIEW:** Criação e versionamento da view `vw_relatorio_livros` no PostgreSQL via **Doctrine Migrations**.
-- **Desacoplamento e Agrupamento:** A consulta à view é executada pelo `RelatorioService` via Doctrine DBAL, agrupando as informações por Autor e consolidando múltiplos autores e assuntos sem duplicação inconsistente de dados.
-- **Gráficos com Symfony UX Chart.js:** Em vez de scripts soltos de CDN, os gráficos são configurados orientados a objetos no PHP (`ChartBuilderInterface`) e renderizados de forma nativa pelo Symfony UX com AssetMapper/Stimulus.
-- **Exportação em PDF:** Geração de documento corporativo em formato A4 utilizando o **Dompdf**.
+### 2. Modelagem Relacional Fiel ao Legado
+- **Fidelidade Integral ao Esquema:** Mapeamento exato dos nomes físicos de tabelas e colunas exigidos no modelo relacional do desafio (`Livro`, `Autor`, `Assunto`, `Codl`, `CodAu`, `codAs`, `Livro_Autor`, `Livro_Assunto`).
+- **PHP 8.4 & Doctrine ORM 3.x:** Mapeamento moderno via atributos nativos (`#[ORM\Table]`, `#[ORM\Column(name: '`Codl`')]`), mantendo o código PHP com propriedades em camelCase (`$id`, `$titulo`, `$anoPublicacao`, `$valor`).
+- **Requisito do Valor Monetário (R$):** Armazenado no banco como `DECIMAL(10,2)` no PostgreSQL, com conversão bidirecional via `BrazilianMoneyTransformer` no formulário e filtro Twig `|money_br` na apresentação.
 
-### 3. Camada de Apresentação com Twig Moderno e Bootstrap 5
-- **Componentização:** Utilização do `symfony/ux-twig-component` para criação de componentes reutilizáveis (`<twig:PageHeader>`, `<twig:Card>`, `<twig:Alert>`), eliminando repetição de HTML.
-- **Filtro de Moeda com Atributos PHP 8.4:** Utilização do atributo `#[AsTwigFilter('money_br')]` na classe `MoneyExtension` para formatação em padrão brasileiro (`R$ 1.500,00`).
-- **DataTransformer do Symfony Forms:** Implementação do `BrazilianMoneyTransformer` no formulário de Livro, realizando a conversão bidirecional transparente entre a entrada do usuário (`150,50` ou `R$ 1.250,00`) e o armazenamento decimal no banco.
-- **Validação Integrada:** Configuração com `novalidate` para acionar a validação do Symfony Validator com feedback visual elegante do Bootstrap (`is-invalid` e `.invalid-feedback`).
+### 3. Relatório Gerencial Obrigatório com VIEW SQL Nativa
+- **Versionamento via Migrations:** Criação da view `vw_relatorio_livros` diretamente no PostgreSQL via Doctrine Migrations.
+- **Agrupamento por Autor com Co-autorias:** A consulta é executada via Doctrine DBAL pelo `RelatorioService`, agrupando as obras por autor e tratando cenários onde um livro possui múltiplos autores e múltiplos assuntos sem redundância incorreta.
+- **Gráficos Nativos Symfony UX Chart.js:** Configurados no PHP via `ChartBuilderInterface` e renderizados de forma reativa pelo Symfony UX / Stimulus.
+- **Exportação em PDF:** Geração de documento corporativo em formato A4 utilizando **Dompdf**, com sumário executivo, KPIs e distribuição percentual de acervo.
 
-### 4. Otimização de Performance e Resiliência
-- **Prevenção do Problema N+1:** Método customizado no `LivroRepository` (`findAllWithAutoresAndAssuntos()`) utilizando `LEFT JOIN` e `addSelect` para carregar livros, autores e assuntos em uma única consulta otimizada.
-- **Tratamento Específico de Erros:** Captura cirúrgica de `ForeignKeyConstraintViolationException` para impedir exclusões que violem a integridade referencial, exibindo mensagens amigáveis ao invés de páginas de erro genéricas.
+### 4. Componentes Reutilizáveis com Symfony UX Twig Component
+- Componentização declarativa oficial do Symfony UX (`<twig:PageHeader>`, `<twig:Card>`, `<twig:Table>`, `<twig:Button>`, `<twig:Navbar>`, `<twig:Alert>`).
+- Redução drástica de repetição de HTML nos templates com parametrização tipada no PHP (`#[AsTwigComponent]`).
+
+### 5. Resiliência e Integridade de Dados
+- **Prevenção de Consultas N+1:** Método customizado no `LivroRepository` (`findAllWithAutoresAndAssuntos()`) utilizando `LEFT JOIN` e `addSelect` para carregar livros, autores e assuntos em uma única consulta otimizada.
+- **Tratamento Cirúrgico de Exclusões:** Bloqueio de exclusão para autores ou assuntos que possuam livros vinculados com lançamento de `EntityInUseException`, emitindo feedback visual amigável (`alert-danger`) em vez de páginas de erro genéricas.
 
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **PHP 8.4-FPM**
-- **Symfony 8.1**
-- **PostgreSQL 16**
+- **PHP 8.4-FPM** (com `opcache`, `intl`, `pdo_pgsql`)
+- **Symfony 8.1** (Framework completo com autowiring e atributos nativos)
+- **PostgreSQL 16** (com VIEW SQL versionada)
 - **Nginx (Alpine)**
-- **Doctrine ORM 3.x & Migrations**
+- **Doctrine ORM 3.x & Doctrine Migrations**
 - **Symfony UX Twig Components & Symfony UX Chart.js**
-- **Dompdf**
-- **PHPUnit 10+**
+- **Dompdf 3.x**
+- **PHPUnit 13**
 - **Bootstrap 5.3 & Bootstrap Icons**
 
 ---
@@ -63,61 +66,104 @@ git clone https://github.com/wfreitass/symfony_livros
 cd livros
 ```
 
-### 2. Subir o Ambiente Docker
-O Dockerfile irá compilar a imagem PHP 8.4 com todas as extensões necessárias (`pdo_pgsql`, `intl`, `zip`, `opcache`):
+### 2. Subir os Containers Docker
 ```bash
 docker compose up -d --build
 ```
 
 ### 3. Executar as Migrations (Tabelas + VIEW SQL)
-Execute as migrations para criar as tabelas do modelo de dados e a VIEW do relatório no PostgreSQL:
 ```bash
 docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
 ```
 
-### 4. Acessar a Aplicação
-Abra no navegador:
+### 4. Popular Dados de Demonstração (Seed)
+Execute o comando de carga rápida para semear o banco com autores clássicos, livros com co-autorias e múltiplos assuntos:
+```bash
+docker compose exec app php bin/console app:seed --clean --no-interaction
+```
+
+### 5. Acessar a Aplicação
+Abra no seu navegador:
 👉 **[http://localhost:8080](http://localhost:8080)**
 
 ---
 
-## 🧪 Execução dos Testes Automatizados (TDD)
+## 🧪 Suíte de Testes Automatizados (TDD)
 
-A suíte de testes contempla testes unitários (entidades, extensões de template e transformers) e testes funcionais (`WebTestCase` para rotas, CRUDs e exportação de PDF):
+O projeto conta com **48 testes e 220 asserções** cobrindo testes unitários e testes funcionais HTTP de ponta a ponta:
 
 ```bash
 docker compose exec app bin/phpunit
 ```
 
+### Cobertura da Suíte:
+1. **Testes Funcionais / HTTP (`WebTestCase`):**
+   - [`HomeControllerTest`](file:///home/workspace/livros/tests/Functional/HomeControllerTest.php): Requisições na raiz `/`, verificação dos cards de KPI e links rápidos.
+   - [`LivroControllerTest`](file:///home/workspace/livros/tests/Functional/LivroControllerTest.php): Listagem, formulário de cadastro com conversão de moeda (`BrazilianMoneyTransformer`), edição e exclusão.
+   - [`AutorControllerTest`](file:///home/workspace/livros/tests/Functional/AutorControllerTest.php): CRUD completo e validação de bloqueio de exclusão para autores com obras vinculadas.
+   - [`AssuntoControllerTest`](file:///home/workspace/livros/tests/Functional/AssuntoControllerTest.php): CRUD completo e validação de integridade referencial.
+   - [`RelatorioControllerTest`](file:///home/workspace/livros/tests/Functional/RelatorioControllerTest.php): Renderização da página analítica e validação do download de PDF (`Content-Type: application/pdf`, cabeçalho `%PDF-`).
+2. **Testes Unitários:**
+   - Entidades e regras de domínio ([`LivroTest`](file:///home/workspace/livros/tests/Unit/Entity/LivroTest.php)).
+   - Serviços de negócio ([`LivroServiceTest`](file:///home/workspace/livros/tests/Unit/Service/LivroServiceTest.php), [`AutorServiceTest`](file:///home/workspace/livros/tests/Unit/Service/AutorServiceTest.php), [`AssuntoServiceTest`](file:///home/workspace/livros/tests/Unit/Service/AssuntoServiceTest.php), [`RelatorioServiceTest`](file:///home/workspace/livros/tests/Unit/Service/RelatorioServiceTest.php)).
+   - Extensões Twig e formatação monetária ([`MoneyExtensionTest`](file:///home/workspace/livros/tests/Unit/Twig/MoneyExtensionTest.php)).
+   - Componentes visuais do Symfony UX ([`ComponentsTest`](file:///home/workspace/livros/tests/Unit/Twig/ComponentsTest.php)).
+
 ---
 
-## 📋 Estrutura de Pastas do Projeto
+## 🎤 Roteiro para Apresentação Técnica (Entrevista)
+
+Ao apresentar o projeto para a banca avaliadora, sugerimos seguir o seguinte roteiro:
+
+1. **Visão Geral e Arquitetura:**
+   - Explicar a separação em **Service Layer** (`src/Service/`) com **Dependency Inversion** através de interfaces (`src/Contract/`).
+   - Apresentar a fidelidade do banco ao modelo físico do desafio (`Codl`, `CodAu`, `codAs`), demonstrando o mapeamento limpo com atributos do Doctrine ORM.
+2. **Execução e Seed:**
+   - Demonstrar o comando `php bin/console app:seed --clean` que popula o catálogo com dados reais e co-autorias (*"Belas Maldições"* com Neil Gaiman e Terry Pratchett).
+3. **Tela Inicial e Navegação (`/`):**
+   - Mostrar a tela inicial com os indicadores em tempo real e atalhos diretos para os módulos.
+4. **CRUDs e Validação:**
+   - Demonstrar a máscara e validação de moeda no cadastro de livro (aceitando formato brasileiro `150,50` ou `R$ 150,50`).
+   - Tentar excluir um autor vinculado a livros (ex: Machado de Assis) e mostrar o feedback de proteção (`EntityInUseException`).
+5. **Relatório Gerencial com VIEW SQL:**
+   - Exibir a VIEW `vw_relatorio_livros` no PostgreSQL via migration.
+   - Demonstrar o encapsulamento das consultas no `RelatorioRepository` e a agregação no `RelatorioService`.
+   - Demonstrar a tela web do relatório com gráficos interativos do Symfony UX Chart.js e agrupamento por autor.
+   - Gerar o relatório corporativo em PDF com um clique.
+6. **Qualidade de Código & Testes:**
+   - Executar `docker compose exec app bin/phpunit` na frente dos avaliadores mostrando **100% de aprovação em 48 testes**.
+   - Rodar os linters do Symfony (`lint:container`, `lint:twig`, `lint:yaml`).
+
+---
+
+## 📋 Estrutura de Diretórios
 
 ```text
 livros/
-├── assets/                  # Controladores Stimulus e assets do AssetMapper
-├── config/                  # Configurações do framework e pacotes
-├── docker/                  # Configuração do Nginx
-├── migrations/              # Migrations versionadas (incluindo a VIEW SQL)
+├── assets/                  # Assets gerenciados pelo AssetMapper e controllers Stimulus
+├── config/                  # Configurações do framework, bundles e rotas
+├── docker/                  # Configuração do servidor Web Nginx
+├── migrations/              # Migrations do Doctrine (incluindo a VIEW SQL)
 ├── src/
-│   ├── Controller/          # Controllers (Autor, Assunto, Livro, Relatorio)
-│   ├── Entity/              # Entidades Doctrine (Autor, Assunto, Livro)
-│   ├── Form/                # FormTypes e DataTransformers
-│   ├── Repository/          # Repositórios otimizados (evitando N+1)
-│   ├── Service/             # Serviços de negócio (RelatorioService, PdfService)
-│   └── Twig/                # Extensões e filtros com atributos PHP 8.4
+│   ├── Command/             # Comandos CLI (app:seed)
+│   ├── Contract/            # Interfaces de serviços e repositórios (DIP / SOLID)
+│   ├── Controller/          # Thin Controllers (Home, Livro, Autor, Assunto, Relatorio)
+│   ├── Entity/              # Entidades Doctrine mapeadas para o esquema físico
+│   ├── Exception/           # Exceções de domínio (EntityInUseException)
+│   ├── Form/                # FormTypes e DataTransformers (BrazilianMoneyTransformer)
+│   ├── Repository/          # Repositórios Doctrine e DBAL (RelatorioRepository, LivroRepository, etc.)
+│   ├── Service/             # Camada de serviços (RelatorioService, LivroService, etc.)
+│   └── Twig/                # Componentes PHP do UX Twig e extensões de formatação
 ├── templates/
-│   ├── components/          # Componentes Twig reutilizáveis
-│   ├── autor/               # Telas do CRUD de Autores
-│   ├── assunto/             # Telas do CRUD de Assuntos
-│   ├── livro/               # Telas do CRUD de Livros
-│   └── relatorio/           # Dashboard com gráficos Chart.js e template PDF
+│   ├── components/          # Templates dos componentes Twig reutilizáveis
+│   ├── home/                # Painel de boas-vindas com métricas e atalhos
+│   ├── livro/               # CRUD do acervo de livros
+│   ├── autor/               # CRUD de autores
+│   ├── assunto/             # CRUD de assuntos
+│   └── relatorio/           # Dashboard com gráficos Chart.js e layout do PDF
 ├── tests/
-│   ├── Functional/          # Testes funcionais com WebTestCase
-│   └── Unit/                # Testes de unidade (Entities, Form, Twig)
-├── docker-compose.yml       # Orquestração (App, Web, Database)
-└── Dockerfile               # Imagem PHP 8.4-FPM
+│   ├── Functional/          # Testes HTTP de ponta a ponta com WebTestCase
+│   └── Unit/                # Testes unitários (Services, Entities, Twig, Form)
+├── docker-compose.yml       # Orquestração multicontêiner (PHP 8.4 + Postgres 16 + Nginx)
+└── Dockerfile               # Build da imagem PHP 8.4-FPM
 ```
-
-
-

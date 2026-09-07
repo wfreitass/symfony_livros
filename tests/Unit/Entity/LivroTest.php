@@ -32,10 +32,16 @@ class LivroTest extends TestCase
         $livro = new Livro();
         $autor1 = (new Autor())->setNome('Robert C. Martin');
         $autor2 = (new Autor())->setNome('Martin Fowler');
-        $livro->addAutore($autor1);
-        $livro->addAutore($autor2);
+        $livro->addAutor($autor1);
+        $livro->addAutor($autor2);
         $this->assertCount(2, $livro->getAutores());
         $this->assertTrue($livro->getAutores()->contains($autor1));
+        $livro->removeAutor($autor1);
+        $this->assertCount(1, $livro->getAutores());
+
+        // Teste dos aliases para compatibilidade
+        $livro->addAutore($autor1);
+        $this->assertCount(2, $livro->getAutores());
         $livro->removeAutore($autor1);
         $this->assertCount(1, $livro->getAutores());
     }

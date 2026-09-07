@@ -142,18 +142,34 @@ class Livro
         return $this->autores;
     }
 
-    public function addAutore(Autor $autore): static
+    public function addAutor(Autor $autor): static
     {
-        if (!$this->autores->contains($autore)) {
-            $this->autores->add($autore);
+        if (!$this->autores->contains($autor)) {
+            $this->autores->add($autor);
         }
         return $this;
     }
 
+    public function removeAutor(Autor $autor): static
+    {
+        $this->autores->removeElement($autor);
+        return $this;
+    }
+
+    /**
+     * Alias mantido para compatibilidade com o gerador do Symfony Maker.
+     */
+    public function addAutore(Autor $autore): static
+    {
+        return $this->addAutor($autore);
+    }
+
+    /**
+     * Alias mantido para compatibilidade com o gerador do Symfony Maker.
+     */
     public function removeAutore(Autor $autore): static
     {
-        $this->autores->removeElement($autore);
-        return $this;
+        return $this->removeAutor($autore);
     }
 
     /**

@@ -9,7 +9,7 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 class Navbar
 {
     public string $brand = 'Gestão de Livros';
-    public string $brandRoute = 'app_livro_index';
+    public string $brandRoute = 'app_home';
     public string $brandIcon = 'bi-book-half text-warning';
 
     public function __construct(
@@ -26,10 +26,6 @@ class Navbar
         $current = $this->getCurrentRoute();
         if (!$current) {
             return false;
-        }
-
-        if ($prefixOrRoute === 'app_livro' && $current === 'app_home') {
-            return true;
         }
 
         return str_starts_with($current, $prefixOrRoute);

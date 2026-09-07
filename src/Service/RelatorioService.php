@@ -2,13 +2,13 @@
 
 namespace App\Service;
 
+use App\Contract\RelatorioRepositoryInterface;
 use App\Contract\RelatorioServiceInterface;
-use Doctrine\DBAL\Connection;
 
 class RelatorioService implements RelatorioServiceInterface
 {
     public function __construct(
-        private readonly Connection $connection
+        private readonly RelatorioRepositoryInterface $relatorioRepository
     ) {}
 
     /**
@@ -16,8 +16,7 @@ class RelatorioService implements RelatorioServiceInterface
      */
     public function getDadosRelatorioAgrupadosPorAutor(): array
     {
-        $sql = 'SELECT * FROM vw_relatorio_livros ORDER BY autor_nome ASC, livro_titulo ASC, assunto_descricao ASC';
-        $rows = $this->connection->executeQuery($sql)->fetchAllAssociative();
+        $rows = $this->relatorioRepository->findDadosViewRelatorio();
 
         $autoresAgrupados = [];
 
@@ -58,29 +57,8 @@ class RelatorioService implements RelatorioServiceInterface
      */
     public function getMetricasGraficos(): array
     {
-        // 1. Quantidade de Livros e Soma de Valores por Autor a partir da VIEW
-        $sqlAutores = '
-            SELECT 
-                autor_nome,
-                COUNT(DISTINCT livro_id) AS total_livros,
-                SUM(livro_valor) AS valor_total
-            FROM vw_relatorio_livros
-            GROUP BY autor_id, autor_nome
-            ORDER BY total_livros DESC, valor_total DESC
-        ';
-        $dadosAutores = $this->connection->executeQuery($sqlAutores)->fetchAllAssociative();
-
-        // 2. Quantidade de Obras por Assunto a partir da VIEW
-        $sqlAssuntos = '
-            SELECT 
-                assunto_descricao,
-                COUNT(DISTINCT livro_id) AS total_livros
-            FROM vw_relatorio_livros
-            WHERE assunto_descricao IS NOT NULL
-            GROUP BY assunto_id, assunto_descricao
-            ORDER BY total_livros DESC
-        ';
-        $dadosAssuntos = $this->connection->executeQuery($sqlAssuntos)->fetchAllAssociative();
+        $dadosAutores = $this->relatorioRepository->findMetricasObrasPorAutor();
+        $dadosAssuntos = $this->relatorioRepository->findMetricasObrasPorAssunto();
 
         return [
             'autores' => [

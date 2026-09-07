@@ -1,13 +1,31 @@
-<div class="card shadow-sm border-0 mb-4">
-    {% if title %}
-    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
-        {% if icon %}
-        <i class="bi {{ icon }} text-primary me-2 fs-5"></i>
+<div {{ attributes.defaults({ class: this.classes }) }}>
+    {% block header %}
+        {% if title %}
+        <div class="card-header {{ headerClass|default('bg-white py-3 border-bottom d-flex align-items-center') }}">
+            {% if icon %}
+            <i class="bi {{ icon }} {{ variant ? '' : 'text-primary' }} me-2 fs-5"></i>
+            {% endif %}
+            <h6 class="m-0 fw-bold {{ variant ? '' : 'text-dark' }}">{{ title }}</h6>
+        </div>
         {% endif %}
-        <h6 class="m-0 fw-bold text-dark">{{ title }}</h6>
-    </div>
-    {% endif %}
-    <div class="card-body">
+    {% endblock %}
+
+    <div class="card-body {{ bodyClass }}">
         {% block content %}{% endblock %}
     </div>
+
+    {% block footer %}
+        {% if footer or footerLink %}
+        <div class="card-footer {{ footerClass|default(variant ? 'bg-' ~ variant ~ ' border-0 pt-0' : 'bg-light border-top') }}">
+            {% if footerLink %}
+            <a href="{{ footerLink }}" class="{{ variant and not (variant in ['light', 'info', 'warning']) ? 'text-white' : 'text-dark' }} text-decoration-none small d-flex align-items-center justify-content-between">
+                <span>{{ footerLinkLabel }}</span>
+                {% if footerLinkIcon %}<i class="bi {{ footerLinkIcon }}"></i>{% endif %}
+            </a>
+            {% else %}
+            {{ footer|raw }}
+            {% endif %}
+        </div>
+        {% endif %}
+    {% endblock %}
 </div>

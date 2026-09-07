@@ -65,11 +65,23 @@ class ComponentsTest extends TestCase
         $card = new Card();
         $this->assertNull($card->title);
         $this->assertNull($card->icon);
+        $this->assertNull($card->variant);
+        $this->assertTrue($card->shadow);
+        $this->assertFalse($card->border);
+        $this->assertSame('mb-4', $card->margin);
+        $this->assertSame('card border-0 shadow-sm mb-4', $card->getClasses());
 
         $card->title = 'Meus Livros';
         $card->icon = 'bi-book';
         $this->assertSame('Meus Livros', $card->title);
         $this->assertSame('bi-book', $card->icon);
+
+        $card->variant = 'primary';
+        $card->margin = '';
+        $this->assertSame('card border-0 shadow-sm bg-primary text-white', $card->getClasses());
+
+        $card->variant = 'info';
+        $this->assertSame('card border-0 shadow-sm bg-info text-dark', $card->getClasses());
     }
 
     #[Test]
@@ -99,7 +111,7 @@ class ComponentsTest extends TestCase
         $navbar = new Navbar($requestStack);
 
         $this->assertSame('Gestão de Livros', $navbar->brand);
-        $this->assertSame('app_livro_index', $navbar->brandRoute);
+        $this->assertSame('app_home', $navbar->brandRoute);
         $this->assertFalse($navbar->isRouteActive('app_livro'));
 
         $request = new Request([], [], ['_route' => 'app_livro_index']);
@@ -112,7 +124,7 @@ class ComponentsTest extends TestCase
         $homeRequest = new Request([], [], ['_route' => 'app_home']);
         $requestStack->pop();
         $requestStack->push($homeRequest);
-        $this->assertTrue($navbar->isRouteActive('app_livro'));
+        $this->assertFalse($navbar->isRouteActive('app_livro'));
     }
 
     #[Test]

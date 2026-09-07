@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Contract\AutorServiceInterface;
 use App\Entity\Autor;
+use App\Exception\EntityInUseException;
 use App\Repository\AutorRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -39,6 +40,12 @@ class AutorService extends AbstractEntityService implements AutorServiceInterfac
      */
     public function delete(Autor $autor): void
     {
+        if ($autor->getLivros()->count() > 0) {
+            throw new EntityInUseException(
+                sprintf('Não é possível excluir o autor "%s" porque ele está vinculado a um ou mais livros.', $autor->getNome())
+            );
+        }
+
         $this->safeRemoveAndFlush(
             $autor,
             sprintf('Não é possível excluir o autor "%s" porque ele está vinculado a um ou mais livros.', $autor->getNome())

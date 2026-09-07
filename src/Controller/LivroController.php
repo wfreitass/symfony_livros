@@ -17,7 +17,6 @@ class LivroController extends AbstractController
         private readonly LivroServiceInterface $livroService
     ) {}
 
-    #[Route('/', name: 'app_home', methods: ['GET'])]
     #[Route('/', name: 'app_livro_index', methods: ['GET'])]
     public function index(): Response
     {

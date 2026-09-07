@@ -1,0 +1,129 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Início - Gestão de Livros{% endblock %}
+
+{% block body %}
+<twig:PageHeader
+    title="Painel de Gestão do Acervo"
+    subtitle="Sistema corporativo de controle de livros, autores, assuntos e relatórios gerenciais"
+/>
+
+<!-- Resumo dos Indicadores (KPIs) -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <twig:Card
+            variant="primary"
+            margin=""
+            class="h-100"
+            bodyClass="d-flex align-items-center justify-content-between p-3"
+            footerLink="{{ path('app_livro_index') }}"
+            footerLinkLabel="Acessar Acervo"
+        >
+            <div>
+                <span class="text-white-50 text-uppercase fw-bold small">Livros</span>
+                <h3 class="fw-bold mb-0 mt-1">{{ totalLivros }}</h3>
+            </div>
+            <div class="rounded-circle bg-white bg-opacity-25 p-3">
+                <i class="bi bi-book fs-3 text-white"></i>
+            </div>
+        </twig:Card>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <twig:Card
+            variant="secondary"
+            margin=""
+            class="h-100"
+            bodyClass="d-flex align-items-center justify-content-between p-3"
+            footerLink="{{ path('app_autor_index') }}"
+            footerLinkLabel="Ver Autores"
+        >
+            <div>
+                <span class="text-white-50 text-uppercase fw-bold small">Autores</span>
+                <h3 class="fw-bold mb-0 mt-1">{{ totalAutores }}</h3>
+            </div>
+            <div class="rounded-circle bg-white bg-opacity-25 p-3">
+                <i class="bi bi-people fs-3 text-white"></i>
+            </div>
+        </twig:Card>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <twig:Card
+            variant="info"
+            margin=""
+            class="h-100 text-dark"
+            bodyClass="d-flex align-items-center justify-content-between p-3"
+            footerLink="{{ path('app_assunto_index') }}"
+            footerLinkLabel="Ver Assuntos"
+        >
+            <div>
+                <span class="text-dark-50 text-uppercase fw-bold small">Assuntos</span>
+                <h3 class="fw-bold mb-0 mt-1">{{ totalAssuntos }}</h3>
+            </div>
+            <div class="rounded-circle bg-dark bg-opacity-10 p-3">
+                <i class="bi bi-tags fs-3 text-dark"></i>
+            </div>
+        </twig:Card>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <twig:Card
+            variant="success"
+            margin=""
+            class="h-100"
+            bodyClass="d-flex align-items-center justify-content-between p-3"
+            footerLink="{{ path('app_relatorio_index') }}"
+            footerLinkLabel="Relatório Analítico"
+        >
+            <div>
+                <span class="text-white-50 text-uppercase fw-bold small">Valor Total</span>
+                <h3 class="fw-bold mb-0 mt-1">{{ valorTotalAcervo|money_br }}</h3>
+            </div>
+            <div class="rounded-circle bg-white bg-opacity-25 p-3">
+                <i class="bi bi-cash-coin fs-3 text-white"></i>
+            </div>
+        </twig:Card>
+    </div>
+</div>
+
+
+<!-- Últimos Livros Cadastrados -->
+{% if ultimosLivros|length > 0 %}
+<twig:Card title="Últimas Obras Registradas" icon="bi-clock-history">
+    <twig:Table
+        :columns="[
+            { label: 'Cód.', width: '70px' },
+            { label: 'Título' },
+            { label: 'Editora' },
+            { label: 'Edição', class: 'text-center', width: '80px' },
+            { label: 'Ano', class: 'text-center', width: '90px' },
+            { label: 'Valor', class: 'text-end', width: '120px' },
+            { label: 'Autores' },
+            { label: 'Ações', class: 'text-end', width: '100px' }
+        ]"
+        :items="ultimosLivros"
+    >
+        {% for livro in ultimosLivros %}
+        <tr>
+            <td class="fw-semibold text-muted">#{{ livro.id }}</td>
+            <td class="fw-bold text-dark">{{ livro.titulo }}</td>
+            <td>{{ livro.editora }}</td>
+            <td class="text-center">{{ livro.edicao }}ª</td>
+            <td class="text-center">{{ livro.anoPublicacao }}</td>
+            <td class="text-end fw-bold text-success">{{ livro.valor|money_br }}</td>
+            <td>
+                {% for autor in livro.autores %}
+                <span class="badge bg-secondary mb-1">{{ autor.nome }}</span>
+                {% endfor %}
+            </td>
+            <td class="text-end">
+                <twig:Button href="{{ path('app_livro_edit', {'id': livro.id}) }}"
+                    variant="outline-secondary" size="sm" icon="bi-pencil" title="Editar" />
+            </td>
+        </tr>
+        {% endfor %}
+    </twig:Table>
+</twig:Card>
+{% endif %}
+{% endblock %}
