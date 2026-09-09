@@ -106,8 +106,6 @@ docker compose exec app bin/phpunit
 1. **Testes Funcionais / HTTP (`WebTestCase`):**
    - [`HomeControllerTest`](file:///home/workspace/livros/tests/Functional/HomeControllerTest.php): Requisições na raiz `/`, verificação dos cards de KPI e links rápidos.
    - [`LivroControllerTest`](file:///home/workspace/livros/tests/Functional/LivroControllerTest.php): Listagem paginada (5 itens/página), formulário de cadastro com conversão de moeda (`BrazilianMoneyTransformer`), edição e exclusão.
-   - [`AutorControllerTest`](file:///home/workspace/livros/tests/Functional/AutorControllerTest.php): CRUD completo, paginação KnpPaginator e validação de bloqueio de exclusão para autores com obras vinculadas.
-   - [`AssuntoControllerTest`](file:///home/workspace/livros/tests/Functional/AssuntoControllerTest.php): CRUD completo, paginação KnpPaginator e validação de integridade referencial.
    - [`RelatorioControllerTest`](file:///home/workspace/livros/tests/Functional/RelatorioControllerTest.php): Renderização da página analítica e validação do download de PDF (`Content-Type: application/pdf`, cabeçalho `%PDF-`).
 2. **Testes Unitários:**
    - Entidades e regras de domínio ([`LivroTest`](file:///home/workspace/livros/tests/Unit/Entity/LivroTest.php)).
