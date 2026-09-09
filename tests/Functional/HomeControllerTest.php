@@ -26,7 +26,6 @@ class HomeControllerTest extends WebTestCase
 
         $this->assertResponseIsSuccessful();
 
-        // Links de navegação para as entidades e relatórios
         $this->assertGreaterThan(0, $crawler->filter('a[href="/livro/"]')->count());
         $this->assertGreaterThan(0, $crawler->filter('a[href="/autor/"]')->count());
         $this->assertGreaterThan(0, $crawler->filter('a[href="/assunto/"]')->count());
