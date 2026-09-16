@@ -44,26 +44,32 @@ class AssuntoService extends AbstractEntityService implements AssuntoServiceInte
 
     /**
      * Salva ou atualiza um assunto.
+     *
+     * @param Assunto $entity
      */
-    public function save(Assunto $assunto): void
+    public function save(object $entity): void
     {
-        $this->persistAndFlush($assunto);
+        $this->persistAndFlush($entity);
     }
 
     /**
      * Exclui um assunto, lançando exceção específica caso esteja vinculado a livros.
+     *
+     * @param Assunto $entity
      */
-    public function delete(Assunto $assunto): void
+    public function delete(object $entity): void
     {
-        if ($assunto->getLivros()->count() > 0) {
+        if ($entity instanceof Assunto && $entity->getLivros()->count() > 0) {
             throw new EntityInUseException(
-                sprintf('Não é possível excluir o assunto "%s" porque ele está vinculado a um ou mais livros.', $assunto->getDescricao())
+                sprintf('Não é possível excluir o assunto "%s" porque ele está vinculado a um ou mais livros.', $entity->getDescricao())
             );
         }
 
+        $descricao = $entity instanceof Assunto ? $entity->getDescricao() : '';
+
         $this->safeRemoveAndFlush(
-            $assunto,
-            sprintf('Não é possível excluir o assunto "%s" porque ele está vinculado a um ou mais livros.', $assunto->getDescricao())
+            $entity,
+            sprintf('Não é possível excluir o assunto "%s" porque ele está vinculado a um ou mais livros.', $descricao)
         );
     }
 }

@@ -129,11 +129,29 @@ docker compose exec app bin/phpunit
    - [`HomeControllerTest`](file:///home/workspace/livros/tests/Functional/HomeControllerTest.php): Requisições na raiz `/`, verificação dos cards de KPI e links rápidos.
    - [`LivroControllerTest`](file:///home/workspace/livros/tests/Functional/LivroControllerTest.php): Listagem paginada (5 itens/página), formulário de cadastro com conversão de moeda (`BrazilianMoneyTransformer`), edição e exclusão.
    - [`RelatorioControllerTest`](file:///home/workspace/livros/tests/Functional/RelatorioControllerTest.php): Renderização da página analítica e validação do download de PDF (`Content-Type: application/pdf`, cabeçalho `%PDF-`).
+   - [`RateLimiterTest`](file:///home/workspace/livros/tests/Functional/RateLimiterTest.php): Controle de vazão com o componente Symfony RateLimiter, validação de limites aceitos, bloqueio com HTTP 429 (`Too Many Requests`), cabeçalho `Retry-After` e restauração após reset.
 2. **Testes Unitários:**
    - Entidades e regras de domínio ([`LivroTest`](file:///home/workspace/livros/tests/Unit/Entity/LivroTest.php)).
    - Serviços de negócio e paginação ([`LivroServiceTest`](file:///home/workspace/livros/tests/Unit/Service/LivroServiceTest.php), [`AutorServiceTest`](file:///home/workspace/livros/tests/Unit/Service/AutorServiceTest.php), [`AssuntoServiceTest`](file:///home/workspace/livros/tests/Unit/Service/AssuntoServiceTest.php), [`RelatorioServiceTest`](file:///home/workspace/livros/tests/Unit/Service/RelatorioServiceTest.php)).
    - Extensões Twig e formatação monetária ([`MoneyExtensionTest`](file:///home/workspace/livros/tests/Unit/Twig/MoneyExtensionTest.php)).
    - Componentes visuais do Symfony UX ([`ComponentsTest`](file:///home/workspace/livros/tests/Unit/Twig/ComponentsTest.php)).
+3. **Testes Unitários JavaScript (`node:test`):**
+   - [`form_submit.test.mjs`](file:///home/workspace/livros/tests/Js/form_submit.test.mjs): 11 testes automatizados cobrindo desativação de botões ao enviar, prevenção de cliques duplos (double submit) e tratamento de formulários inválidos (HTML5 e Turbo).
+
+---
+
+## 🛡️ Controle de Taxa de Requisições (Rate Limiting)
+
+Implementado com o componente oficial **Symfony RateLimiter** (`symfony/rate-limiter` + `symfony/lock`), utilizando a política **`sliding_window`** para distribuição uniforme das requisições e proteção contra DoS/abuso:
+
+- **Limiters Configurados (`config/packages/rate_limiter.yaml`):**
+  - **`main_app`**: Limite geral de navegação (120 req/min por IP).
+  - **`form_mutation`**: Limite específico para operações de escrita `POST` (40 req/min por IP) em formulários e exclusões.
+  - **`pdf_export`**: Limite restrito para geração pesada de PDF (`/relatorio/pdf` - 10 req/min por IP).
+- **Abordagem Declarativa Nativa (Symfony 8.1):**
+  - Uso do atributo `#[RateLimit('main_app')]` nas classes de Controller e `#[RateLimit('pdf_export')]` em rotas sensíveis.
+  - Resposta padrão `HTTP 429 Too Many Requests` com cabeçalho `Retry-After`.
+  - Página de erro 429 amigável personalizada com Bootstrap 5 ([`error429.html.twig`](file:///home/workspace/livros/templates/bundles/TwigBundle/Exception/error429.html.twig)).
 
 ---
 

@@ -8,9 +8,12 @@ use App\Form\LivroType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\RateLimit;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/livro')]
+#[RateLimit('main_app')]
+#[RateLimit('form_mutation', methods: ['POST'])]
 class LivroController extends AbstractController
 {
     public function __construct(
@@ -23,7 +26,7 @@ class LivroController extends AbstractController
         $page = $request->query->getInt('page', 1);
 
         return $this->render('livro/index.html.twig', [
-            'livros' => $this->livroService->listPaginated($page, 5),
+            'livros' => $this->livroService->listPaginated($page),
         ]);
     }
 

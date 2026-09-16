@@ -4,11 +4,14 @@ namespace App\Service;
 
 use App\Contract\RelatorioRepositoryInterface;
 use App\Contract\RelatorioServiceInterface;
+use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
+use Symfony\UX\Chartjs\Model\Chart;
 
 class RelatorioService implements RelatorioServiceInterface
 {
     public function __construct(
-        private readonly RelatorioRepositoryInterface $relatorioRepository
+        private readonly RelatorioRepositoryInterface $relatorioRepository,
+        private readonly ChartBuilderInterface $chartBuilder
     ) {}
 
     /**
@@ -74,28 +77,117 @@ class RelatorioService implements RelatorioServiceInterface
     }
 
     /**
-     * Calcula métricas totais a partir dos dados agrupados.
+     * Calcula métricas totais a partir dos dados agrupados,
+     * desduplicando livros com múltiplos autores para refletir a contagem real
+     * e o valor financeiro exato do acervo.
      *
-     * @param array<int, array{id: int, nome: string, livros: array<int, array{valor: string|float}>}> $dados
+     * @param array<int, array{id: int, nome: string, livros: array<int, array{id?: int, valor: string|float}>}> $dados
      * @return array{totalAutores: int, totalObras: int, valorTotal: float}
      */
     public function calcularTotais(array $dados): array
     {
         $totalAutores = count($dados);
-        $totalObras = 0;
-        $valorTotal = 0.0;
+        $livrosUnicos = [];
 
         foreach ($dados as $autor) {
-            $totalObras += count($autor['livros']);
-            foreach ($autor['livros'] as $livro) {
-                $valorTotal += (float) $livro['valor'];
+            foreach ($autor['livros'] as $key => $livro) {
+                $livroId = $livro['id'] ?? $key;
+                if (!isset($livrosUnicos[$livroId])) {
+                    $livrosUnicos[$livroId] = (float) $livro['valor'];
+                }
             }
         }
 
         return [
             'totalAutores' => $totalAutores,
-            'totalObras' => $totalObras,
-            'valorTotal' => $valorTotal,
+            'totalObras' => count($livrosUnicos),
+            'valorTotal' => (float) array_sum($livrosUnicos),
         ];
+    }
+
+    /**
+     * Constrói todos os gráficos analíticos do relatório gerencial.
+     *
+     * @return array{chartLivros: Chart, chartValores: Chart}
+     */
+    public function buildCharts(): array
+    {
+        $metricas = $this->getMetricasGraficos();
+
+        return [
+            'chartLivros' => $this->buildChartLivrosPorAutor($metricas['autores']),
+            'chartValores' => $this->buildChartValoresPorAutor($metricas['autores']),
+        ];
+    }
+
+    /**
+     * Constrói o gráfico de barras com a quantidade de livros por autor.
+     *
+     * @param array{labels: string[], quantidades: int[], valores: float[]} $metricasAutores
+     */
+    public function buildChartLivrosPorAutor(array $metricasAutores): Chart
+    {
+        $chart = $this->chartBuilder->createChart(Chart::TYPE_BAR);
+        $chart->setData([
+            'labels' => $metricasAutores['labels'],
+            'datasets' => [
+                [
+                    'label' => 'Qtd. de Obras',
+                    'backgroundColor' => 'rgba(13, 110, 253, 0.75)',
+                    'borderColor' => 'rgb(13, 110, 253)',
+                    'borderWidth' => 1,
+                    'borderRadius' => 4,
+                    'data' => $metricasAutores['quantidades'],
+                ],
+            ],
+        ]);
+        $chart->setOptions([
+            'responsive' => true,
+            'plugins' => [
+                'legend' => ['display' => false],
+            ],
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+                    'ticks' => ['stepSize' => 1],
+                ],
+            ],
+        ]);
+
+        return $chart;
+    }
+
+    /**
+     * Constrói o gráfico de rosca (doughnut) com os valores financeiros do acervo por autor.
+     *
+     * @param array{labels: string[], quantidades: int[], valores: float[]} $metricasAutores
+     */
+    public function buildChartValoresPorAutor(array $metricasAutores): Chart
+    {
+        $chart = $this->chartBuilder->createChart(Chart::TYPE_DOUGHNUT);
+        $chart->setData([
+            'labels' => $metricasAutores['labels'],
+            'datasets' => [
+                [
+                    'label' => 'Valor em Acervo (R$)',
+                    'backgroundColor' => [
+                        '#198754',
+                        '#0dcaf0',
+                        '#ffc107',
+                        '#fd7e14',
+                        '#6f42c1',
+                        '#20c997',
+                        '#d63384',
+                    ],
+                    'borderWidth' => 1,
+                    'data' => $metricasAutores['valores'],
+                ],
+            ],
+        ]);
+        $chart->setOptions([
+            'responsive' => true,
+        ]);
+
+        return $chart;
     }
 }

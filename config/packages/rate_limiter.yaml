@@ -1,0 +1,30 @@
+framework:
+    rate_limiter:
+        main_app:
+            policy: 'sliding_window'
+            limit: 120
+            interval: '1 minute'
+        form_mutation:
+            policy: 'sliding_window'
+            limit: 40
+            interval: '1 minute'
+        pdf_export:
+            policy: 'sliding_window'
+            limit: 10
+            interval: '1 minute'
+
+when@test:
+    framework:
+        rate_limiter:
+            main_app:
+                policy: 'sliding_window'
+                limit: 300
+                interval: '1 minute'
+            form_mutation:
+                policy: 'sliding_window'
+                limit: 100
+                interval: '1 minute'
+            pdf_export:
+                policy: 'sliding_window'
+                limit: 5
+                interval: '1 minute'

@@ -9,9 +9,12 @@ use App\Form\AssuntoType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\RateLimit;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/assunto')]
+#[RateLimit('main_app')]
+#[RateLimit('form_mutation', methods: ['POST'])]
 class AssuntoController extends AbstractController
 {
     public function __construct(
@@ -24,7 +27,7 @@ class AssuntoController extends AbstractController
         $page = $request->query->getInt('page', 1);
 
         return $this->render('assunto/index.html.twig', [
-            'assuntos' => $this->assuntoService->listPaginated($page, 5),
+            'assuntos' => $this->assuntoService->listPaginated($page),
         ]);
     }
 

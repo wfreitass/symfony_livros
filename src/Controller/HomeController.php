@@ -8,8 +8,10 @@ use App\Contract\LivroServiceInterface;
 use App\Contract\RelatorioServiceInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\RateLimit;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[RateLimit('main_app')]
 class HomeController extends AbstractController
 {
     public function __construct(

@@ -44,26 +44,32 @@ class AutorService extends AbstractEntityService implements AutorServiceInterfac
 
     /**
      * Salva ou atualiza um autor.
+     *
+     * @param Autor $entity
      */
-    public function save(Autor $autor): void
+    public function save(object $entity): void
     {
-        $this->persistAndFlush($autor);
+        $this->persistAndFlush($entity);
     }
 
     /**
      * Exclui um autor, lançando exceção específica caso esteja vinculado a livros.
+     *
+     * @param Autor $entity
      */
-    public function delete(Autor $autor): void
+    public function delete(object $entity): void
     {
-        if ($autor->getLivros()->count() > 0) {
+        if ($entity instanceof Autor && $entity->getLivros()->count() > 0) {
             throw new EntityInUseException(
-                sprintf('Não é possível excluir o autor "%s" porque ele está vinculado a um ou mais livros.', $autor->getNome())
+                sprintf('Não é possível excluir o autor "%s" porque ele está vinculado a um ou mais livros.', $entity->getNome())
             );
         }
 
+        $nome = $entity instanceof Autor ? $entity->getNome() : '';
+
         $this->safeRemoveAndFlush(
-            $autor,
-            sprintf('Não é possível excluir o autor "%s" porque ele está vinculado a um ou mais livros.', $autor->getNome())
+            $entity,
+            sprintf('Não é possível excluir o autor "%s" porque ele está vinculado a um ou mais livros.', $nome)
         );
     }
 }

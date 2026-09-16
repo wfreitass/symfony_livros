@@ -6,9 +6,21 @@ use App\Contract\RelatorioRepositoryInterface;
 use App\Service\RelatorioService;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
+use Symfony\UX\Chartjs\Model\Chart;
 
 class RelatorioServiceTest extends TestCase
 {
+    private function createService(
+        ?RelatorioRepositoryInterface $repository = null,
+        ?ChartBuilderInterface $chartBuilder = null
+    ): RelatorioService {
+        return new RelatorioService(
+            $repository ?? $this->createStub(RelatorioRepositoryInterface::class),
+            $chartBuilder ?? $this->createStub(ChartBuilderInterface::class)
+        );
+    }
+
     #[Test]
     public function testGetDadosRelatorioAgrupadosPorAutor(): void
     {
@@ -42,7 +54,7 @@ class RelatorioServiceTest extends TestCase
                 ],
             ]);
 
-        $service = new RelatorioService($repository);
+        $service = $this->createService($repository);
         $dados = $service->getDadosRelatorioAgrupadosPorAutor();
 
         $this->assertCount(1, $dados);
@@ -70,7 +82,7 @@ class RelatorioServiceTest extends TestCase
                 ['assunto_descricao' => 'Filosofia', 'total_livros' => 2],
             ]);
 
-        $service = new RelatorioService($repository);
+        $service = $this->createService($repository);
         $metricas = $service->getMetricasGraficos();
 
         $this->assertSame(['Clarice Lispector'], $metricas['autores']['labels']);
@@ -83,8 +95,7 @@ class RelatorioServiceTest extends TestCase
     #[Test]
     public function testCalcularTotaisComDados(): void
     {
-        $repository = $this->createStub(RelatorioRepositoryInterface::class);
-        $service = new RelatorioService($repository);
+        $service = $this->createService();
 
         $dados = [
             1 => [
@@ -112,15 +123,121 @@ class RelatorioServiceTest extends TestCase
     }
 
     #[Test]
+    public function testCalcularTotaisDeduplicaLivrosComMultiplosAutores(): void
+    {
+        $service = $this->createService();
+
+        // Livro 6 com múltiplos autores (Neil Gaiman e Terry Pratchett)
+        $dados = [
+            5 => [
+                'id' => 5,
+                'nome' => 'Neil Gaiman',
+                'livros' => [
+                    6 => ['id' => 6, 'valor' => '64.90'],
+                ],
+            ],
+            6 => [
+                'id' => 6,
+                'nome' => 'Terry Pratchett',
+                'livros' => [
+                    6 => ['id' => 6, 'valor' => '64.90'],
+                ],
+            ],
+        ];
+
+        $totais = $service->calcularTotais($dados);
+
+        $this->assertSame(2, $totais['totalAutores']);
+        $this->assertSame(1, $totais['totalObras']);
+        $this->assertSame(64.90, $totais['valorTotal']);
+    }
+
+    #[Test]
     public function testCalcularTotaisComDadosVazios(): void
     {
-        $repository = $this->createStub(RelatorioRepositoryInterface::class);
-        $service = new RelatorioService($repository);
+        $service = $this->createService();
 
         $totais = $service->calcularTotais([]);
 
         $this->assertSame(0, $totais['totalAutores']);
         $this->assertSame(0, $totais['totalObras']);
         $this->assertSame(0.0, $totais['valorTotal']);
+    }
+
+    #[Test]
+    public function testBuildChartLivrosPorAutor(): void
+    {
+        $chartBuilder = $this->createMock(ChartBuilderInterface::class);
+        $chartMock = new Chart(Chart::TYPE_BAR);
+        $chartBuilder->expects($this->once())
+            ->method('createChart')
+            ->with(Chart::TYPE_BAR)
+            ->willReturn($chartMock);
+
+        $service = $this->createService(null, $chartBuilder);
+        $chart = $service->buildChartLivrosPorAutor([
+            'labels' => ['Machado de Assis'],
+            'quantidades' => [5],
+            'valores' => [200.0],
+        ]);
+
+        $this->assertSame($chartMock, $chart);
+        $this->assertSame(Chart::TYPE_BAR, $chart->getType());
+        $data = $chart->getData();
+        $this->assertSame(['Machado de Assis'], $data['labels']);
+        $this->assertSame([5], $data['datasets'][0]['data']);
+    }
+
+    #[Test]
+    public function testBuildChartValoresPorAutor(): void
+    {
+        $chartBuilder = $this->createMock(ChartBuilderInterface::class);
+        $chartMock = new Chart(Chart::TYPE_DOUGHNUT);
+        $chartBuilder->expects($this->once())
+            ->method('createChart')
+            ->with(Chart::TYPE_DOUGHNUT)
+            ->willReturn($chartMock);
+
+        $service = $this->createService(null, $chartBuilder);
+        $chart = $service->buildChartValoresPorAutor([
+            'labels' => ['Machado de Assis'],
+            'quantidades' => [5],
+            'valores' => [200.0],
+        ]);
+
+        $this->assertSame($chartMock, $chart);
+        $this->assertSame(Chart::TYPE_DOUGHNUT, $chart->getType());
+        $data = $chart->getData();
+        $this->assertSame(['Machado de Assis'], $data['labels']);
+        $this->assertSame([200.0], $data['datasets'][0]['data']);
+    }
+
+    #[Test]
+    public function testBuildChartsDelegatesAndReturnsBothCharts(): void
+    {
+        $repository = $this->createMock(RelatorioRepositoryInterface::class);
+        $repository->expects($this->once())
+            ->method('findMetricasObrasPorAutor')
+            ->willReturn([
+                ['autor_nome' => 'Guimarães Rosa', 'total_livros' => 2, 'valor_total' => 80.00],
+            ]);
+        $repository->expects($this->once())
+            ->method('findMetricasObrasPorAssunto')
+            ->willReturn([]);
+
+        $chartBuilder = $this->createMock(ChartBuilderInterface::class);
+        $chartBuilder->expects($this->exactly(2))
+            ->method('createChart')
+            ->willReturnCallback(function (string $type) {
+                return new Chart($type);
+            });
+
+        $service = $this->createService($repository, $chartBuilder);
+        $charts = $service->buildCharts();
+
+        $this->assertArrayHasKey('chartLivros', $charts);
+        $this->assertArrayHasKey('chartValores', $charts);
+        $this->assertSame(Chart::TYPE_BAR, $charts['chartLivros']->getType());
+        $this->assertSame(Chart::TYPE_DOUGHNUT, $charts['chartValores']->getType());
     }
 }

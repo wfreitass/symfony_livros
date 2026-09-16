@@ -9,9 +9,12 @@ use App\Form\AutorType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\RateLimit;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/autor')]
+#[RateLimit('main_app')]
+#[RateLimit('form_mutation', methods: ['POST'])]
 class AutorController extends AbstractController
 {
     public function __construct(
@@ -24,7 +27,7 @@ class AutorController extends AbstractController
         $page = $request->query->getInt('page', 1);
 
         return $this->render('autor/index.html.twig', [
-            'autores' => $this->autorService->listPaginated($page, 5),
+            'autores' => $this->autorService->listPaginated($page),
         ]);
     }
 

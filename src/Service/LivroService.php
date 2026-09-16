@@ -43,18 +43,22 @@ class LivroService extends AbstractEntityService implements LivroServiceInterfac
 
     /**
      * Salva ou atualiza um livro.
+     *
+     * @param Livro $entity
      */
-    public function save(Livro $livro): void
+    public function save(object $entity): void
     {
-        $this->persistAndFlush($livro);
+        $this->persistAndFlush($entity);
     }
 
     /**
      * Exclui um livro.
+     *
+     * @param Livro $entity
      */
-    public function delete(Livro $livro): void
+    public function delete(object $entity): void
     {
-        $this->removeAndFlush($livro);
+        $this->removeAndFlush($entity);
     }
 
 
