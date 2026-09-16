@@ -56,4 +56,10 @@ class LivroService extends AbstractEntityService implements LivroServiceInterfac
     {
         $this->removeAndFlush($livro);
     }
+
+
+    public function listFiveLast(): array
+    {
+        return $this->livroRepository->findFiveLast();
+    }
 }

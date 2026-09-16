@@ -22,4 +22,9 @@ interface LivroServiceInterface
     public function save(Livro $livro): void;
 
     public function delete(Livro $livro): void;
+
+    /**
+     * @return Livro[]
+     */
+    public function listFiveLast(): array;
 }

@@ -90,4 +90,21 @@ class LivroServiceTest extends TestCase
 
         $service->delete($livro);
     }
+
+    #[Test]
+    public function testListFiveLastDelegatesToRepository(): void
+    {
+        $em = $this->createStub(EntityManagerInterface::class);
+        $repo = $this->createMock(LivroRepository::class);
+        $paginator = $this->createStub(PaginatorInterface::class);
+        $service = new LivroService($em, $repo, $paginator);
+
+        $livros = [new Livro(), new Livro()];
+        $repo->expects($this->once())
+            ->method('findFiveLast')
+            ->willReturn($livros);
+
+        $result = $service->listFiveLast();
+        $this->assertSame($livros, $result);
+    }
 }

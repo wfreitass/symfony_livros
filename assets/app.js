@@ -1,4 +1,5 @@
 import './stimulus_bootstrap.js';
+import './controllers/form_submit_controller.js';
 
 // Importação dos estilos do Bootstrap e Bootstrap Icons locais
 import 'bootstrap/dist/css/bootstrap.min.css';

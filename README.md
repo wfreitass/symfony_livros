@@ -92,6 +92,28 @@ docker compose exec app php bin/console app:seed --clean --no-interaction
 Abra no seu navegador:
 👉 **[http://localhost:8080](http://localhost:8080)**
 
+### 6. Resetar o Banco e Rodar as Seeds (Ambiente de Desenvolvimento)
+
+- **Reset Rápido (limpa tabelas, reinicia IDs e semeia dados):**
+  ```bash
+  docker compose exec app php bin/console app:seed --clean --no-interaction
+  ```
+
+- **Reset Completo (recria banco do zero, executa migrations e roda seeds):**
+  ```bash
+  docker compose exec app php bin/console doctrine:database:drop --force --if-exists && \
+  docker compose exec app php bin/console doctrine:database:create && \
+  docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction && \
+  docker compose exec app php bin/console app:seed --clean --no-interaction
+  ```
+
+- **Reset do Banco de Testes Automatizados:**
+  ```bash
+  docker compose exec app php bin/console doctrine:database:drop --force --if-exists --env=test && \
+  docker compose exec app php bin/console doctrine:database:create --env=test && \
+  docker compose exec app php bin/console doctrine:migrations:migrate --env=test --no-interaction
+  ```
+
 ---
 
 ## 🧪 Suíte de Testes Automatizados (TDD)

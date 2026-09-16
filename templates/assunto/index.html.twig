@@ -7,24 +7,19 @@
     :actions="[{ label: 'Novo Assunto', url: path('app_assunto_new'), icon: 'bi-plus-lg', class: 'btn-primary' }]" />
 
 <twig:Card title="Lista de Assuntos" icon="bi-tags">
-    <twig:Table
-        :columns="[
+    <twig:Table :columns="[
             { label: 'Código', width: '100px' },
             { label: 'Descrição' },
             { label: 'Ações', class: 'text-end', width: '180px' }
-        ]"
-        :items="assuntos"
-        emptyMessage="Nenhum assunto cadastrado até o momento."
-        emptyIcon="bi-inbox"
-    >
+        ]" :items="assuntos" emptyMessage="Nenhum assunto cadastrado até o momento." emptyIcon="bi-inbox">
         {% for assunto in assuntos %}
         <tr>
             <td class="fw-semibold text-muted">#{{ assunto.id }}</td>
             <td class="fw-bold">{{ assunto.descricao }}</td>
             <td class="text-end">
                 <div class="d-flex justify-content-end gap-2">
-                    <twig:Button href="{{ path('app_assunto_edit', {'id': assunto.id}) }}"
-                        variant="outline-secondary" size="sm" icon="bi-pencil" title="Editar" />
+                    <twig:Button href="{{ path('app_assunto_edit', {'id': assunto.id}) }}" variant="outline-secondary"
+                        size="sm" icon="bi-pencil" title="Editar" />
                     <form method="post" action="{{ path('app_assunto_delete', {'id': assunto.id}) }}"
                         onsubmit="return confirm('Deseja realmente excluir este assunto?');" class="d-inline">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ assunto.id) }}">

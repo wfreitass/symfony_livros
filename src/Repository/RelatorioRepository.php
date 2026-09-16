@@ -16,13 +16,28 @@ class RelatorioRepository implements RelatorioRepositoryInterface
      */
     public function findDadosViewRelatorio(): array
     {
-        $sql = 'SELECT * FROM vw_relatorio_livros ORDER BY autor_nome ASC, livro_titulo ASC, assunto_descricao ASC';
+        $sql = '
+            SELECT 
+                autor_id,
+                autor_nome,
+                livro_id,
+                livro_titulo,
+                livro_editora,
+                livro_edicao,
+                livro_ano_publicacao,
+                livro_valor,
+                assunto_id,
+                assunto_descricao
+            FROM vw_relatorio_livros 
+            ORDER BY autor_nome ASC, livro_titulo ASC, assunto_descricao ASC
+        ';
 
         return $this->connection->executeQuery($sql)->fetchAllAssociative();
     }
 
     /**
-     * Retorna quantidade de livros e soma de valores por autor a partir da VIEW.
+     * Retorna quantidade de livros e soma de valores por autor a partir da VIEW vw_relatorio_livros.
+     * Utiliza subconsulta na VIEW para desduplicar livros com múltiplos assuntos antes de somar os valores.
      */
     public function findMetricasObrasPorAutor(): array
     {
@@ -31,7 +46,10 @@ class RelatorioRepository implements RelatorioRepositoryInterface
                 autor_nome,
                 COUNT(DISTINCT livro_id) AS total_livros,
                 SUM(livro_valor) AS valor_total
-            FROM vw_relatorio_livros
+            FROM (
+                SELECT DISTINCT autor_id, autor_nome, livro_id, livro_valor 
+                FROM vw_relatorio_livros
+            ) v
             GROUP BY autor_id, autor_nome
             ORDER BY total_livros DESC, valor_total DESC
         ';
@@ -40,7 +58,7 @@ class RelatorioRepository implements RelatorioRepositoryInterface
     }
 
     /**
-     * Retorna quantidade de obras por assunto a partir da VIEW.
+     * Retorna quantidade de obras por assunto a partir da VIEW vw_relatorio_livros.
      */
     public function findMetricasObrasPorAssunto(): array
     {

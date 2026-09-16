@@ -4,6 +4,8 @@ namespace App\Repository;
 
 use App\Entity\Livro;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -20,7 +22,7 @@ class LivroRepository extends ServiceEntityRepository
     /**
      * Retorna a QueryBuilder para paginação de livros trazendo autores e assuntos (evita N+1).
      */
-    public function createAllWithAutoresAndAssuntosQueryBuilder(): \Doctrine\ORM\QueryBuilder
+    public function createAllWithAutoresAndAssuntosQueryBuilder(): QueryBuilder
     {
         return $this->createQueryBuilder('l')
             ->leftJoin('l.autores', 'a')
@@ -40,5 +42,23 @@ class LivroRepository extends ServiceEntityRepository
         return $this->createAllWithAutoresAndAssuntosQueryBuilder()
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Retorna os últimos 5 livros cadastrados com autores e assuntos (usando Paginator para evitar corte de joins N+1).
+     *
+     * @return Livro[]
+     */
+    public function findFiveLast(): array
+    {
+        $qb = $this->createQueryBuilder('l')
+            ->leftJoin('l.autores', 'a')
+            ->addSelect('a')
+            ->leftJoin('l.assuntos', 's')
+            ->addSelect('s')
+            ->orderBy('l.id', 'DESC')
+            ->setMaxResults(5);
+        // return $qb->getQuery()->getResult();
+        return iterator_to_array(new Paginator($qb));
     }
 }

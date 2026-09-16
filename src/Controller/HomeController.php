@@ -22,7 +22,8 @@ class HomeController extends AbstractController
     #[Route('/', name: 'app_home', methods: ['GET'])]
     public function index(): Response
     {
-        $livros = $this->livroService->listAll();
+        $todosLivros = $this->livroService->listAll();
+        $ultimosLivros = $this->livroService->listFiveLast();
         $autores = $this->autorService->listAll();
         $assuntos = $this->assuntoService->listAll();
 
@@ -30,11 +31,11 @@ class HomeController extends AbstractController
         $totais = $this->relatorioService->calcularTotais($dadosRelatorio);
 
         return $this->render('home/index.html.twig', [
-            'totalLivros' => count($livros),
+            'totalLivros' => count($todosLivros),
             'totalAutores' => count($autores),
             'totalAssuntos' => count($assuntos),
             'valorTotalAcervo' => $totais['valorTotal'],
-            'ultimosLivros' => array_slice($livros, 0, 5),
+            'ultimosLivros' => $ultimosLivros,
         ]);
     }
 }
